@@ -13,6 +13,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node, // Add Node.js global variables
+        NodeJS: true,
       },
       parser: tsParser,
       ecmaVersion: "latest",

@@ -26,7 +26,7 @@ export interface MonitorData {
     usedMemory: number;
   };
   diskUsage?: EnhancedDiskUsage[] | null;
-  networkInfo?: Record<string, os.NetworkInterfaceInfo[]>; // Corrected type for network info
+  networkInfo?: NodeJS.Dict<os.NetworkInterfaceInfo[]>;
   uptime?: number;
   processInfo?: {
     cpu: number;
