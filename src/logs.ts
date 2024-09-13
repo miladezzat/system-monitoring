@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 
 /**
  * Get logs from a specified file and optionally filter by a keyword.
@@ -6,16 +6,19 @@ import fs from 'fs';
  * @param {string} [keyword] - Optional keyword to filter logs.
  * @returns {Promise<string[]>} Filtered or complete log data.
  */
-export async function getLogs(path: string, keyword?: string): Promise<string[]> {
-    try {
-        const logs = fs.readFileSync(path, 'utf8');
-        const logLines = logs.split('\n');
-        if (keyword) {
-            return logLines.filter(line => line.includes(keyword));
-        }
-        return logLines;
-    } catch (err) {
-        console.error('Error reading logs:', err);
-        return [];
+export async function getLogs(
+  path: string,
+  keyword?: string,
+): Promise<string[]> {
+  try {
+    const logs = fs.readFileSync(path, "utf8");
+    const logLines = logs.split("\n");
+    if (keyword) {
+      return logLines.filter((line) => line.includes(keyword));
     }
+    return logLines;
+  } catch (err) {
+    console.error("Error reading logs:", err);
+    return [];
+  }
 }
