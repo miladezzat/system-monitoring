@@ -8,6 +8,8 @@
     "scripts": {
         "build": "tsc",
         "lint": "eslint 'src/**/*.{js,ts}'",
+        "version": "standard-version",
+        "postversion": "git push --follow-tags",
         "lint:fix": "eslint 'src/**/*.{js,ts}' --fix"
     },
     "keywords": [],
@@ -25,6 +27,7 @@
         "express": "^4.21.0",
         "globals": "^15.9.0",
         "prettier": "^3.3.3",
+        "standard-version": "^9.5.0",
         "typescript": "^4.x.x",
         "typescript-eslint": "^8.5.0"
     }
