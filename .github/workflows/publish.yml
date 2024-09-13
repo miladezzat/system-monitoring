@@ -35,9 +35,7 @@ jobs:
         git push --follow-tags
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        
     - name: Publish to npm
       uses: JS-DevTools/npm-publish@v1
       with:
