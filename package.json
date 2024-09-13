@@ -1,6 +1,6 @@
 {
     "name": "system-monitoring",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "description": "A zero-dependency server monitor package",
     "main": "dist/systemMonitor.js",
     "scripts": {
