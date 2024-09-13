@@ -1,0 +1,18 @@
+{
+    "name": "system-monitoring",
+    "version": "1.0.0",
+    "description": "A zero-dependency server monitor package",
+    "main": "dist/systemMonitor.js",
+    "scripts": {
+        "build": "tsc"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/express": "^4.17.21",
+        "@types/node": "^22.5.4",
+        "express": "^4.21.0",
+        "typescript": "^4.x.x"
+    }
+}
