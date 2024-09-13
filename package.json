@@ -1,8 +1,10 @@
 {
     "name": "system-monitoring",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "A zero-dependency server monitor package",
     "main": "dist/systemMonitor.js",
+    "types": "./dist/systemMonitor.d.ts",
+    "source": "./src/systemMonitor.ts",
     "scripts": {
         "build": "tsc",
         "lint": "eslint 'src/**/*.{js,ts}'",
