@@ -1,0 +1,32 @@
+# Ignore directories
+node_modules/
+dist/               # If you want to exclude the build output (dist)
+coverage/           # Code coverage reports
+test/               # Your test files or test-related directories
+__tests__/          # If you follow the __tests__ convention
+scripts/            # Development scripts or utility scripts
+
+# Ignore configuration and dotfiles
+*.log               # Log files
+*.ts                # TypeScript source files
+*.map               # Source maps
+tsconfig.json       # TypeScript configuration
+.eslint*            # ESLint configurations
+.prettierrc         # Prettier configuration
+.vscode/            # VS Code specific config files
+.idea/              # JetBrains IDE specific config files
+.git/               # Git directory
+.env                # Environment variables
+
+# Ignore example/demo files
+example/
+examples/
+demo/
+
+# Ignore any temporary files or lockfiles
+*.lock
+.DS_Store           # macOS-specific hidden file
+Thumbs.db           # Windows-specific hidden file
+test
+
+*.mjs
