@@ -1,15 +1,14 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# This workflow will do a clean install of node dependencies, build the source code,
+# update the version and changelog, and then publish the package to npm.
 
 name: NPM publish
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,13 +19,29 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+        registry-url: 'https://registry.npmjs.org/'
+    - name: Set up Git
+      run: |
+        git config --global user.email "miladezzat.f@gmail.com"
+        git config --global user.name "Milad E. Fahmy"
     - run: npm install
     - run: npm run build
+    - run: npm run version # This updates the version and changelog
+    - name: Push changes
+      run: git push --follow-tags
+
+    - run: |
+          git checkout development  # Switch to development branch
+          git pull origin development  # Pull latest changes
+          git reset --hard origin/main  # Reset to the latest main branch
+          git push origin development  # Push changes to development branch
     
-    - id: publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish to npm
       uses: JS-DevTools/npm-publish@v1
       with:
-        token: ${{ secrets.NPM_TOKEN}}
+        token: ${{ secrets.NPM_TOKEN }}
     - if: steps.publish.outputs.type != 'none'
       run: |
         echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
