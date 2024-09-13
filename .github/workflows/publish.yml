@@ -7,6 +7,11 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,21 +32,27 @@ jobs:
     - run: npm install
     - run: npm run build
     - run: npm run version # This updates the version and changelog
-    - name: Push changes
-      run: git push --follow-tags
 
-    - run: |
-          git checkout development  # Switch to development branch
-          git pull origin development  # Pull latest changes
-          git reset --hard origin/main  # Reset to the latest main branch
-          git push origin development  # Push changes to development branch
-    
+    - name: Push changes to main branch
+      run: |
+        git push --follow-tags
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Sync changes with development branch
+      run: |
+        git checkout development  # Switch to development branch
+        git pull origin development  # Pull latest changes
+        git merge main --no-edit  # Merge changes from main to development
+        git push origin development  # Push changes to development branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Publish to npm
       uses: JS-DevTools/npm-publish@v1
       with:
         token: ${{ secrets.NPM_TOKEN }}
+
     - if: steps.publish.outputs.type != 'none'
       run: |
         echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
