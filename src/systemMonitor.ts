@@ -10,7 +10,7 @@ import { getTemperature } from "./temperature";
 import { getLogs } from "./logs";
 
 // Default monitor options
-const defaultOptions: MonitorOptions = {
+export const defaultOptions: MonitorOptions = {
   cpu: true,
   memory: true,
   disk: true,
