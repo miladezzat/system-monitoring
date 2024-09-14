@@ -1,41 +1,44 @@
-name: NPM publish
+name: Publish On NPM
 
 on:
-  push:
-    branches: [main]
-
-permissions:
-  contents: write
-  id-token: write
-  pull-requests: write
+  workflow_run:
+    workflows: ["Testing"]
+    types:
+      - completed
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
+    needs: [workflow_run]
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Check if testing was successful
+      if: ${{ github.event.workflow_run.conclusion == 'success' }}
+      run: echo "Testing was successful, proceeding with publish."
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '22.x'
         registry-url: 'https://registry.npmjs.org/'
+
     - name: Set up Git
       run: |
         git config --global user.email "miladezzat.f@gmail.com"
         git config --global user.name "Milad E. Fahmy"
+
     - run: npm install
     - run: npm run build
-    - run: npm run version # This updates the version and changelog
+    - run: npm run version
 
     - name: Push changes to main branch
       run: |
         git push --follow-tags
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
     - name: Publish to npm
       uses: JS-DevTools/npm-publish@v1
       with:
