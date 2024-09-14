@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.9 (2024-09-14)
+
+
+### Bug Fixes
+
+* track request response ([44b3027](https://github.com/miladezzat/system-monitoring/commit/44b30278329cf1f4f6149181a780596a7d431193))
+
 ### 0.0.8 (2024-09-14)
 
 

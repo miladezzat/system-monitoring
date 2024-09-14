@@ -1,6 +1,6 @@
 {
     "name": "system-monitoring",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "A zero-dependency server monitor package",
     "main": "dist/index.js",
     "types": "./dist/index.d.ts",
