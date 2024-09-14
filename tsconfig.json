@@ -6,10 +6,11 @@
       "rootDir": "./src",
       "esModuleInterop": true,
       "strict": true,
-      "skipLibCheck": true,
-      "types": ["node"]    // Add this line to include node types
+      "skipLibCheck": true,      
+      "forceConsistentCasingInFileNames": true,
+      "types": ["jest", "node"] // Add jest here
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*", "tests/**/*"],
     "exclude": ["node_modules"]
   }
   

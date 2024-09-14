@@ -15,21 +15,20 @@ A Node.js package for monitoring system metrics like CPU usage, memory usage, di
   - [Installation](#installation)
   - [Usage](#usage)
     - [Basic Usage](#basic-usage)
-- [Available Metrics](#available-metrics)
-  - [Express Middleware](#express-middleware)
-  - [API](#api)
-  - [Example Response](#example-response)
-    - [Options](#options)
-  - [Options](#options-1)
+  - [Available Metrics](#available-metrics)
+  - [Express Middlewares](#express-middlewares)
+  - [APIs](#apis)
+    - [Example Response](#example-response)
+  - [Options](#options)
   - [Contributing](#contributing)
 
 ## Installation
 You can install this package using npm:
+
 ```bash
 npm install system-monitoring
 ## Or yarn add system-monitoring
 ```
-
 
 ## Usage
 
@@ -54,7 +53,7 @@ const diskUsage = getDiskUsage();
 console.log('Disk Usage:', diskUsage);
 ```
 
-# Available Metrics
+## Available Metrics
 
 You can retrieve the following system metrics using the provided functions:
 
@@ -67,20 +66,25 @@ You can retrieve the following system metrics using the provided functions:
 7. **System Temperature**: Get the current temperature of the system (if supported).
 8. **Logs**: Fetch system logs from a specific file with optional keyword filtering.
 
-## Express Middleware
+## Express Middlewares
 This package provides an Express middleware to gather and expose system metrics.
 
 ```ts
 import express from 'express';
-import { systemMonitor, trackRequestResponseTime } from 'your-package-name';
+import { systemMonitor, trackRequestResponseTime, createErrorTrackingMiddleware } from 'your-package-name';
+
+const errorTrackingMiddleware: ReturnType<typeof createErrorTrackingMiddleware> = createErrorTrackingMiddleware();
 
 const app = express();
 
 // Middleware to track response time
-app.use(trackRequestResponseTime);
+app.use(trackRequestResponseTime); // access information by req.responseTimeInMs
+
+// track error rate
+app.use(errorTrackingMiddleware) // access information by  req.errorResponse
 
 // System monitor middleware
-app.use(systemMonitor({ cpu: true, memory: true, disk: true }));
+app.use(systemMonitor({ cpu: true, memory: true, disk: true })); // access information by req.systemMetrics
 
 app.get('/', (req, res) => {
   res.send('System monitoring active.');
@@ -91,7 +95,7 @@ app.listen(3000, () => {
 });
 ```
 
-## API
+## APIs
 
 **System Monitoring Functions**
 - **getCpuInfo()**: Returns CPU usage details for all cores and the system as a whole.
@@ -103,9 +107,9 @@ app.listen(3000, () => {
 - **getTemperature()**: Returns the system temperature (if supported).
 - **getLogs(path, keyword)**: Fetches logs from the specified file, optionally filtering by a keyword.
 
-## Example Response
+### Example Response
 
-- CPU Information
+1. CPU Information
 ```json
 {
   "totalUserTime": 123456,
@@ -129,7 +133,7 @@ app.listen(3000, () => {
 }
 ```
 
-- Memory Usage
+2. Memory Usage
 
 ```json
 {
@@ -138,7 +142,7 @@ app.listen(3000, () => {
     "usedMemory": 8388608
 }
 ```
-- Disk Usage
+3. Disk Usage
 ```json
 {
   "total": 104857600,
@@ -147,11 +151,7 @@ app.listen(3000, () => {
 }
 ```
 
-### Options
-The systemMonitor middleware accepts an object with the following options:
-
 ## Options
-
 The `systemMonitor` middleware accepts an object with the following options:
 
 | Option        | Type                                  | Default | Description                                                |
