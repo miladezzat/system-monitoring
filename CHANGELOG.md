@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 0.0.8 (2024-09-14)
+
+
+### Bug Fixes
+
+* build types ([f5865b8](https://github.com/miladezzat/system-monitoring/commit/f5865b8dc71e30a9f8217fa4d5f04c3bd63f1804))
+
 ### 0.0.7 (2024-09-14)
 
 
