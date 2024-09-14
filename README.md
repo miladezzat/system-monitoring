@@ -71,17 +71,17 @@ This package provides an Express middleware to gather and expose system metrics.
 
 ```ts
 import express from 'express';
-import { systemMonitor, trackRequestResponseTime, createErrorTrackingMiddleware } from 'your-package-name';
+import { systemMonitor, trackRequestResponseTime, createErrorTrackingMiddleware } from 'system-monitoring';
 
 const errorTrackingMiddleware: ReturnType<typeof createErrorTrackingMiddleware> = createErrorTrackingMiddleware();
 
 const app = express();
 
 // Middleware to track response time
-app.use(trackRequestResponseTime); // access information by req.responseTimeInMs
+app.use(trackRequestResponseTime()); // the time will append on the response header X-Response-Time, you should have another middleware to get access the responseTime from request req.responseTime
 
 // track error rate
-app.use(errorTrackingMiddleware) // access information by  req.errorResponse
+app.use(errorTrackingMiddleware) // access information by  req.errorResponse, you should have another middleware to get access the error rating from request
 
 // System monitor middleware
 app.use(systemMonitor({ cpu: true, memory: true, disk: true })); // access information by req.systemMetrics
