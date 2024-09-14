@@ -1,10 +1,17 @@
 name: Publish On NPM
 
 on:
+  push:
+    branches: [main]
   workflow_run:
     workflows: ["Testing"]
     types:
       - completed
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
 
 jobs:
   check-testing-success:
