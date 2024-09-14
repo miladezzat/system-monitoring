@@ -1,5 +1,11 @@
 # System Monitor Package
 
+[![npm version](https://badge.fury.io/js/system-monitoring.svg)](https://www.npmjs.com/package/system-monitoring)
+<!-- [![License](https://img.shields.io/npm/l/system-monitoring)](LICENSE) -->
+[![Downloads](https://img.shields.io/npm/dt/system-monitoring)](https://www.npmjs.com/package/system-monitoring)
+
+A lightweight and efficient Node.js library for real-time system monitoring. Track CPU, memory, disk usage, network I/O, and more with ease.
+
 A Node.js package for monitoring system metrics like CPU usage, memory usage, disk usage, network interfaces, uptime, process information, and temperature. This package provides middleware for Express to gather and expose these system metrics in your web applications.
 
 ## Table of Contents
@@ -15,6 +21,7 @@ A Node.js package for monitoring system metrics like CPU usage, memory usage, di
   - [Example Response](#example-response)
     - [Options](#options)
   - [Options](#options-1)
+  - [Contributing](#contributing)
 
 ## Installation
 You can install this package using npm:
@@ -158,3 +165,19 @@ The `systemMonitor` middleware accepts an object with the following options:
 | `temperature` | `boolean`                             | `false` | Enable system temperature monitoring (only on Linux/Windows).|
 | `logs`        | `{ path: string, keyword?: string }`  | `null`  | Fetch logs from a specified file, optionally filtered by keyword. |
 | `responseTime`| `boolean`                             | `false` | Track response time for each request.                      |
+
+
+
+## Contributing
+Contributions are welcome! If you have any bug reports, suggestions, or feature requests, please open an issue on GitHub.
+
+**To contribute:**
+1. Fork the repository
+2. Create a new feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Create a new Pull Request
+
+
+Make sure to follow the [Contributor Covenant Code of Conduct](./CONTRIBUTER.md) when participating in the project.
+
