@@ -72,6 +72,7 @@ jobs:
             git push origin development
           fi
 
-      - if: steps.publish.outputs.type != 'none'
+      - name: Log version change
+        if: steps.publish.outputs.type != 'none'
         run: |
           echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"

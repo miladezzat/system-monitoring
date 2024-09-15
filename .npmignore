@@ -30,3 +30,9 @@ Thumbs.db           # Windows-specific hidden file
 test
 
 *.mjs
+src
+.github
+CHANGELOG.md
+jest.config.js
+CHANGELOG.md
+.npmrc
