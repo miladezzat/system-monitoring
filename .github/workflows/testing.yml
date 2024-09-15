@@ -2,9 +2,9 @@ name: Testing
 
 on:
   push:
-    branches: [ development, main ]
+    branches: [development, main]
   pull_request:
-    branches: [ development, main ]
+    branches: [development, main]
 
 jobs:
   build:
@@ -13,17 +13,18 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x]
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm install    
-    - run: npm test
-    - name: Save test result
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-result
-        path: ./test-results
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm install
+      - run: npm test
+      - name: Save test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-result
+          path: ./test-results

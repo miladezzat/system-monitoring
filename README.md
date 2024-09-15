@@ -17,6 +17,11 @@ A Node.js package for monitoring system metrics like CPU usage, memory usage, di
     - [Basic Usage](#basic-usage)
   - [Available Metrics](#available-metrics)
   - [Express Middlewares](#express-middlewares)
+  - [Middlewares](#middlewares)
+    - [errorTrackingMiddleware](#errortrackingmiddleware)
+    - [trackRequestResponseTime](#trackrequestresponsetime)
+    - [trackTime](#tracktime)
+      - [Notes](#notes)
   - [APIs](#apis)
     - [Example Response](#example-response)
   - [Options](#options)
@@ -78,10 +83,10 @@ const errorTrackingMiddleware: ReturnType<typeof createErrorTrackingMiddleware> 
 const app = express();
 
 // Middleware to track response time
-app.use(trackRequestResponseTime()); // the time will append on the response header X-Response-Time, you should have another middleware to get access the responseTime from request req.responseTime
+app.use(trackRequestResponseTime()); // the time will append on the response header X-Response-Time
 
 // track error rate
-app.use(errorTrackingMiddleware) // access information by  req.errorResponse, you should have another middleware to get access the error rating from request
+app.use(errorTrackingMiddleware) // access information by  req.errorResponse
 
 // System monitor middleware
 app.use(systemMonitor({ cpu: true, memory: true, disk: true })); // access information by req.systemMetrics
@@ -94,6 +99,99 @@ app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
 ```
+
+
+
+
+## Middlewares
+
+### errorTrackingMiddleware
+// will write docs here
+
+### trackRequestResponseTime
+// will write docs here
+
+### trackTime
+`trackTime` is a middleware function for Express.js that tracks the response time for each request and provides the ability to log the data either to a file or to a database via a callback function.
+1. Import the middleware into your Express app.
+2. You can configure trackTime to log the response times to a file, send them to a database, or both.
+
+**Example Code**
+```ts
+import express from 'express';
+import { trackTime } from './middlewares/trackTime';
+
+const app = express();
+
+// Example database storage function (optional)
+function storeOnDb(logData: { method: string; url: string; responseTime: string; timestamp: string }) {
+  // Simulate storing in a database (replace this with your actual DB logic)
+  console.log('Storing log in the database:', logData);
+}
+
+// Use the middleware to track request/response time
+app.use(trackTime({
+  filePath: './logs/request_logs.txt', // Optional: Logs to a file
+  storeOnDb: storeOnDb                 // Optional: Callback to store logs in a database
+}));
+
+// Example route
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
+```
+
+**trackTime Middleware Options**
+You can configure the behavior of the `trackTime` middleware by passing an options object with the following properties:
+
+| Option        | Type                                   | Description                                                                                                                 |
+|---------------|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `filePath`    | `string` (optional)                    | The path where logs will be written. If provided, the middleware will log each request to this file in JSON format.          |
+| `storeOnDb`   | `(logData: LogData) => void` (optional) | A callback function that receives the log data for storing in a database. This function will be called every time a request finishes. |
+
+**Log Data Structure**
+The log data passed to the file or the storeOnDb function will have the following structure:
+```ts
+interface LogData {
+  method: string;       // HTTP method (e.g., GET, POST)
+  url: string;          // The URL requested
+  responseTime: string; // Time taken to process the request in milliseconds
+  timestamp: string;    // ISO timestamp when the request was made
+}
+```
+**Logging Options**
+1. **Logging to a File:** If you provide the filePath option, the logs will be written to the specified file in JSON format. Each log entry will be appended to the file on a new line.
+Example log entry:
+```json
+{"method":"GET","url":"/","responseTime":"12.345","timestamp":"2024-09-15T10:30:00.123Z"}
+```
+2. **Storing in a Database:** If you pass a storeOnDb callback function, it will be called with the log data. You can implement your own logic to store this data in a database (e.g., MongoDB, MySQL).
+
+Example of Custom Database Storage Function
+```ts
+// Example function to store log data in a MongoDB database
+import { MongoClient } from 'mongodb';
+
+async function storeLogInDb(logData: LogData) {
+  const client = await MongoClient.connect('mongodb://localhost:27017');
+  const db = client.db('logsDatabase');
+  await db.collection('requestLogs').insertOne(logData);
+  await client.close();
+}
+
+// Pass this function to the `trackTime` middleware
+app.use(trackTime({ storeOnDb: storeLogInDb }));
+```
+#### Notes
+- **File Path:** Ensure that the file path exists or is writable by your application. If the path does not exist, the middleware will automatically create the directory.
+- **Performance Considerations:** If you log data to a file or database on every request, ensure your storage mechanism can handle the load without affecting performance.
+
+
 
 ## APIs
 
@@ -165,7 +263,6 @@ The `systemMonitor` middleware accepts an object with the following options:
 | `temperature` | `boolean`                             | `false` | Enable system temperature monitoring (only on Linux/Windows).|
 | `logs`        | `{ path: string, keyword?: string }`  | `null`  | Fetch logs from a specified file, optionally filtered by keyword. |
 | `responseTime`| `boolean`                             | `false` | Track response time for each request.                      |
-
 
 
 ## Contributing

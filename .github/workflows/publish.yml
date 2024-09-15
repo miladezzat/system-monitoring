@@ -16,12 +16,18 @@ permissions:
 jobs:
   check-testing-success:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' || github.event_name == 'push'
     outputs:
       testing-success: ${{ steps.check.outputs.testing-success }}
     steps:
       - name: Check if testing was successful
         id: check
-        run: echo "::set-output name=testing-success::${{ github.event.workflow_run.conclusion == 'success' }}"
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "::set-output name=testing-success::${{ github.event.workflow_run.conclusion == 'success' }}"
+          else
+            echo "::set-output name=testing-success::true"
+          fi
 
   publish:
     needs: check-testing-success
@@ -72,6 +78,7 @@ jobs:
             git push origin development
           fi
 
-      - if: steps.publish.outputs.type != 'none'
+      - name: Log version change
+        if: steps.publish.outputs.type != 'none'
         run: |
           echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
