@@ -1,22 +1,38 @@
-name: Publish On NPM
+name: CI and Publish
 
 on:
   push:
-    branches: [main]
-  workflow_run:
-    workflows: ["Testing"]
-    types:
-      - completed
-
-permissions:
-  contents: write
-  id-token: write
-  pull-requests: write
+    branches: [development, main]
+  pull_request:
+    branches: [development, main]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm install
+      - run: npm test
+      - name: Save test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-result
+          path: ./test-results
+
   check-testing-success:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' || github.event_name == 'push'
+    needs: build
+    if: github.event_name == 'push' && github.event_name == 'workflow_run' && github.ref == 'refs/heads/main'
     outputs:
       testing-success: ${{ steps.check.outputs.testing-success }}
     steps:
@@ -31,7 +47,7 @@ jobs:
 
   publish:
     needs: check-testing-success
-    if: needs.check-testing-success.outputs.testing-success == 'true'
+    if: needs.check-testing-success.outputs.testing-success == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
