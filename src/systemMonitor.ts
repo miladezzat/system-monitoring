@@ -29,6 +29,7 @@ export const defaultOptions: MonitorOptions = {
   fileSystemInfo: false,
   activeConnections: false,
   scheduledTasks: false,
+  temperature: false,
 };
 
 /**
