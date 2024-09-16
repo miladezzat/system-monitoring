@@ -1,4 +1,8 @@
 import os from "os";
+import { OSInfo } from "./osInfo";
+import { LoadAverage } from "./loadAverage";
+import { ExtendedUserInfo } from "./userInfo";
+import { ScheduledTasksResponse } from "./scheduledTasks";
 
 /**
  * Monitor options for system metrics.
@@ -13,6 +17,12 @@ export interface MonitorOptions {
   temperature?: boolean;
   logs?: { path: string; keyword?: string };
   responseTime?: boolean;
+  osInfo?: boolean;
+  loadAverage?: boolean;
+  userInfo?: boolean;
+  fileSystemInfo?: boolean;
+  activeConnections?: boolean;
+  scheduledTasks?: boolean;
 }
 
 /**
@@ -35,6 +45,12 @@ export interface MonitorData {
   temperature?: number;
   logs?: string[];
   responseTime?: number;
+  osInfo?: OSInfo;
+  loadAverage?: LoadAverage;
+  userInfo?: ExtendedUserInfo;
+  fileSystemInfo?: string;
+  activeConnections?: string;
+  ScheduledTasks?: ScheduledTasksResponse;
 }
 
 /**
