@@ -18,10 +18,13 @@ A Node.js package for monitoring system metrics like CPU usage, memory usage, di
   - [Available Metrics](#available-metrics)
   - [Express Middlewares](#express-middlewares)
   - [Middlewares](#middlewares)
-    - [errorTrackingMiddleware](#errortrackingmiddleware)
-    - [trackRequestResponseTime](#trackrequestresponsetime)
+    - [Error Tracking Middleware](#error-tracking-middleware)
+      - [Overview](#overview)
+      - [`CustomRequest` Interface](#customrequest-interface)
+      - [`createErrorTrackingMiddleware` Function](#createerrortrackingmiddleware-function)
     - [trackTime](#tracktime)
       - [Notes](#notes)
+    - [trackRequestResponseTime](#trackrequestresponsetime)
   - [APIs](#apis)
   - [Middlewares](#middlewares-1)
     - [Some Response Examples](#some-response-examples)
@@ -106,11 +109,57 @@ app.listen(3000, () => {
 
 ## Middlewares
 
-### errorTrackingMiddleware
-// will write docs here
+### Error Tracking Middleware
+This middleware tracks error statistics for your Express application by intercepting responses and recording error occurrences. It provides detailed insights into the total number of requests, error count, error rate, and the specific routes that are causing errors.
+#### Overview
+- `CustomRequest` Interface: Extends the default Express `Request` object to include an optional errorResponse property for error statistics.
+- `createErrorTrackingMiddleware` Function: Creates an error tracking middleware with isolated state for tracking errors in your Express application.
 
-### trackRequestResponseTime
-// will write docs here
+
+| Option            | Type                                  | Default | Description                                                |
+|-------------------|---------------------------------------|---------|------------------------------------------------------------|
+| `totalRequests`   | `number`                              | `0`     | The total number of requests processed.                   |
+| `errorCount`      | `number`                              | `0`     | The total number of error responses (status code 400 and above). |
+| `errorRate`       | `string`                              | `0.00%` | The percentage of error responses relative to total requests. |
+| `errorRoutes`     | `{ [key: string]: number }`           | `{}`    | An object mapping routes to the number of errors encountered at each route. |
+
+
+#### `CustomRequest` Interface
+The CustomRequest interface extends the standard Express Request object to include an errorResponse property. This property is used to store error tracking information:
+```ts
+export interface CustomRequest extends Request {
+  errorResponse?: {
+    totalRequests: number;
+    errorCount: number;
+    errorRate: string;
+    errorRoutes: { [key: string]: number };
+  };
+}
+```
+
+#### `createErrorTrackingMiddleware` Function
+This factory function creates an Express middleware function that tracks error statistics. It maintains an in-memory state to count total requests, errors, and error rates. The middleware also tracks errors by route.
+- **Usage**
+1. Import the Middleware: Import the `createErrorTrackingMiddleware` function into your Express application.
+```ts
+import { createErrorTrackingMiddleware } from 'system-monitoring';
+```
+2. Add Middleware to Your Application: Use the middleware in your Express application.
+```ts
+const app = express();
+app.use(createErrorTrackingMiddleware());
+```
+3. Access Error Statistics: You can access error statistics via the `errorResponse` property on the `req` object within your route handlers or other middleware.
+```ts
+app.get('/some-route', (req: CustomRequest, res: Response) => {
+  // Access error statistics
+  const errorStats = req.errorResponse;
+  console.log('Error Statistics:', errorStats);
+  
+  res.send('Response body');
+});
+```
+- Note: Future adding, will add appility to adding on file or db like trackTime 
 
 ### trackTime
 `trackTime` is a middleware function for Express.js that tracks the response time for each request and provides the ability to log the data either to a file or to a database via a callback function.
@@ -147,7 +196,7 @@ app.listen(3000, () => {
 });
 ```
 
-**trackTime Middleware Options**
+**Track Time Middleware Options**
 You can configure the behavior of the `trackTime` middleware by passing an options object with the following properties:
 
 | Option        | Type                                   | Description                                                                                                                 |
@@ -192,6 +241,8 @@ app.use(trackTime({ storeOnDb: storeLogInDb }));
 - **File Path:** Ensure that the file path exists or is writable by your application. If the path does not exist, the middleware will automatically create the directory.
 - **Performance Considerations:** If you log data to a file or database on every request, ensure your storage mechanism can handle the load without affecting performance.
 
+### trackRequestResponseTime
+// will write docs here
 
 
 ## APIs
@@ -267,17 +318,23 @@ app.use(trackTime({ storeOnDb: storeLogInDb }));
 ## Options
 The `systemMonitor` middleware accepts an object with the following options:
 
-| Option        | Type                                  | Default | Description                                                |
-|---------------|---------------------------------------|---------|------------------------------------------------------------|
-| `cpu`         | `boolean`                             | `true`  | Enable CPU usage monitoring.                              |
-| `memory`      | `boolean`                             | `true`  | Enable memory usage monitoring.                           |
-| `disk`        | `boolean`                             | `true`  | Enable disk usage monitoring.                             |
-| `network`     | `boolean`                             | `true`  | Enable network interface information monitoring.           |
-| `uptime`      | `boolean`                             | `true`  | Enable system uptime monitoring.                          |
-| `processInfo` | `boolean`                             | `true`  | Enable process CPU and memory usage monitoring.            |
-| `temperature` | `boolean`                             | `false` | Enable system temperature monitoring (only on Linux/Windows).|
-| `logs`        | `{ path: string, keyword?: string }`  | `null`  | Fetch logs from a specified file, optionally filtered by keyword. |
-| `responseTime`| `boolean`                             | `false` | Track response time for each request.                      |
+| Option           | Type                                  | Default | Description                                                |
+|------------------|---------------------------------------|---------|------------------------------------------------------------|
+| `cpu`            | `boolean`                             | `true`  | Enable CPU usage monitoring.                              |
+| `memory`         | `boolean`                             | `true`  | Enable memory usage monitoring.                           |
+| `disk`           | `boolean`                             | `true`  | Enable disk usage monitoring.                             |
+| `network`        | `boolean`                             | `true`  | Enable network interface information monitoring.          |
+| `uptime`         | `boolean`                             | `true`  | Enable system uptime monitoring.                          |
+| `processInfo`    | `boolean`                             | `true`  | Enable process CPU and memory usage monitoring.            |
+| `temperature`    | `boolean`                             | `false` | Enable system temperature monitoring (only on Linux/Windows).|
+| `osInfo`         | `boolean`                             | `false` | Enable operating system information monitoring.            |
+| `loadAverage`    | `boolean`                             | `false` | Enable load average monitoring.                           |
+| `userInfo`       | `boolean`                             | `false` | Enable user information monitoring.                       |
+| `fileSystemInfo` | `boolean`                             | `false` | Enable file system information monitoring.                |
+| `activeConnections` | `boolean`                          | `false` | Enable active network connections monitoring.             |
+| `scheduledTasks` | `boolean`                             | `false` | Enable scheduled tasks monitoring.                        |
+| `logs`           | `{ path: string, keyword?: string }`  | `null`  | Fetch logs from a specified file, optionally filtered by keyword. |
+| `responseTime`   | `boolean`                             | `false` | Track response time for each request.                      |
 
 
 ## Contributing
