@@ -8,6 +8,12 @@ import { getSystemUptime } from "./uptime";
 import { getProcessInfo } from "./processInfo";
 import { getTemperature } from "./temperature";
 import { getLogs } from "./logs";
+import { getOSInfo } from "./osInfo";
+import { getLoadAverage } from "./loadAverage";
+import { getUserInfo } from "./userInfo";
+import { getFileSystemInfo } from "./fileSystemInfo";
+import { getActiveConnections } from "./activeConnections";
+import { getScheduledTasks } from "./scheduledTasks";
 
 // Default monitor options
 export const defaultOptions: MonitorOptions = {
@@ -17,6 +23,12 @@ export const defaultOptions: MonitorOptions = {
   network: true,
   uptime: true,
   processInfo: true,
+  osInfo: false,
+  loadAverage: false,
+  userInfo: false,
+  fileSystemInfo: false,
+  activeConnections: false,
+  scheduledTasks: false,
 };
 
 /**
@@ -40,8 +52,17 @@ export const systemMonitor = (options: MonitorOptions = defaultOptions) => {
       if (options.uptime) data.uptime = await getSystemUptime();
       if (options.processInfo) data.processInfo = await getProcessInfo();
       if (options.temperature) data.temperature = await getTemperature();
+      if (options.osInfo) data.osInfo = await getOSInfo();
+      if (options.loadAverage) data.loadAverage = await getLoadAverage();
+      if (options.userInfo) data.userInfo = await getUserInfo();
+      if (options.fileSystemInfo)
+        data.fileSystemInfo = await getFileSystemInfo();
+      if (options.activeConnections)
+        data.activeConnections = await getActiveConnections();
       if (options.logs)
         data.logs = await getLogs(options.logs.path, options.logs.keyword);
+      if (options.scheduledTasks)
+        data.ScheduledTasks = await getScheduledTasks();
 
       req.systemMetrics = data;
     } catch (err) {
