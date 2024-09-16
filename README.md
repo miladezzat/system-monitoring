@@ -23,7 +23,8 @@ A Node.js package for monitoring system metrics like CPU usage, memory usage, di
     - [trackTime](#tracktime)
       - [Notes](#notes)
   - [APIs](#apis)
-    - [Example Response](#example-response)
+  - [Middlewares](#middlewares-1)
+    - [Some Response Examples](#some-response-examples)
   - [Options](#options)
   - [Contributing](#contributing)
 
@@ -202,10 +203,24 @@ app.use(trackTime({ storeOnDb: storeLogInDb }));
 - **getNetworkInfo()**: Returns details about all network interfaces.
 - **getSystemUptime()**: Returns the system uptime in seconds.
 - **getProcessInfo()**: Provides the CPU and memory usage of the current process.
+- **getOSInfo**: Retrieves detailed information about the operating system.
+- **getLoadAverage**: Retrieves the system load averages over 1, 5, and 15 minutes.
+- **getUserInfo**: Retrieves extended user information and system details.
 - **getTemperature()**: Returns the system temperature (if supported).
+- **getFileSystemInfo**: Retrieves information about the file system, including disk space usage.
+- **getActiveConnections**: Retrieves the active network connections on the system.
+- **getScheduledTasks**: Retrieves a list of scheduled tasks from the system and parses them into an object.
+- **getServiceStatus**: Retrieves the status of a given service.
 - **getLogs(path, keyword)**: Fetches logs from the specified file, optionally filtering by a keyword.
 
-### Example Response
+
+## Middlewares
+- **systemMonitor**: System monitor middleware for gathering system metrics.
+- **trackTime**: Middleware to track request/response time. Logs can either be stored in a file or sent to a database via a callback.
+- **createErrorTrackingMiddleware**: Factory function to create error tracking middleware with isolated state
+- **trackRequestResponseTime**: Middleware to track request and response time. and adding the response time to response header in ms
+
+### Some Response Examples
 
 1. CPU Information
 ```json
