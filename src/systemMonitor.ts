@@ -38,11 +38,7 @@ export const defaultOptions: MonitorOptions = {
  * @returns {Function} Express middleware function.
  */
 export const systemMonitor = (options: MonitorOptions = defaultOptions) => {
-  return async (
-    req: Request & { systemMetrics: MonitorData },
-    res: Response,
-    next: NextFunction,
-  ) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const data: MonitorData = {};
 
     try {
@@ -65,7 +61,7 @@ export const systemMonitor = (options: MonitorOptions = defaultOptions) => {
       if (options.scheduledTasks)
         data.ScheduledTasks = await getScheduledTasks();
 
-      req.systemMetrics = data;
+      (req as Request & { systemMetrics: MonitorData }).systemMetrics = data;
     } catch (err) {
       console.error("Error fetching system metrics:", err);
     }
