@@ -3,6 +3,8 @@ import { OSInfo } from "./osInfo";
 import { LoadAverage } from "./loadAverage";
 import { ExtendedUserInfo } from "./userInfo";
 import { ScheduledTasksResponse } from "./scheduledTasks";
+import { NetworkConnection } from "./activeConnections";
+import { FileSystemInfo } from "./fileSystemInfo";
 
 /**
  * Monitor options for system metrics.
@@ -48,8 +50,8 @@ export interface MonitorData {
   osInfo?: OSInfo;
   loadAverage?: LoadAverage;
   userInfo?: ExtendedUserInfo;
-  fileSystemInfo?: string;
-  activeConnections?: string;
+  fileSystemInfo?: FileSystemInfo[] | string;
+  activeConnections?: NetworkConnection[] | string;
   ScheduledTasks?: ScheduledTasksResponse;
 }
 

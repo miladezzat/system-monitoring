@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app.ts
 import express from "express";
-import { trackTime } from "../src";
+import { trackTime, systemMonitor } from "../src";
 
 const app = express();
 
@@ -23,9 +24,11 @@ app.use(
   }),
 );
 
+app.use(systemMonitor({ fileSystemInfo: true }));
+
 // Sample route
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
+app.get("/", (req: any, res) => {
+  res.json({ message: "Hello, world!", systemMetrics: req.systemMetrics });
 });
 
 // Start the server
