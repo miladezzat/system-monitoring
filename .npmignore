@@ -36,3 +36,5 @@ CHANGELOG.md
 jest.config.js
 CHANGELOG.md
 .npmrc
+
+docs/

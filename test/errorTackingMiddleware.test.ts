@@ -1,5 +1,6 @@
-import { createErrorTrackingMiddleware, CustomRequest } from "../src/errorTrackingMiddleware";
+import { createErrorTrackingMiddleware } from "../src/errorTrackingMiddleware";
 import { Response, NextFunction } from "express";
+import { TrackingCustomErrorRequest } from "../src/types";
 
 // Mock response object with statusCode and send method
 const mockResponse = (): Partial<Response> => {
@@ -10,7 +11,7 @@ const mockResponse = (): Partial<Response> => {
 };
 
 // Mock request object
-const mockRequest = (): Partial<CustomRequest> => {
+const mockRequest = (): Partial<TrackingCustomErrorRequest> => {
   return {
     originalUrl: "/test-route", // Mock the route
   };
@@ -33,7 +34,7 @@ describe("errorTrackingMiddleware", () => {
   });
 
   it("should increment totalRequests on each call", () => {
-    const req = mockRequest() as CustomRequest;
+    const req = mockRequest() as TrackingCustomErrorRequest;
     const res = mockResponse() as Response;
 
     errorTrackingMiddleware(req, res, mockNext);
@@ -45,7 +46,7 @@ describe("errorTrackingMiddleware", () => {
   });
 
   it("should not increment errorCount for non-error responses", () => {
-    const req = mockRequest() as CustomRequest;
+    const req = mockRequest() as TrackingCustomErrorRequest;
     const res = mockResponse() as Response;
     res.statusCode = 200; // Set status to 200 OK
 
@@ -57,7 +58,7 @@ describe("errorTrackingMiddleware", () => {
   });
 
   it("should increment errorCount for error responses", () => {
-    const req = mockRequest() as CustomRequest;
+    const req = mockRequest() as TrackingCustomErrorRequest;
     const res = mockResponse() as Response;
     res.statusCode = 500; // Set status to 500 Internal Server Error
 
@@ -69,7 +70,7 @@ describe("errorTrackingMiddleware", () => {
   });
 
   it("should track errors by route", () => {
-    const req = mockRequest() as CustomRequest;
+    const req = mockRequest() as TrackingCustomErrorRequest;
     const res = mockResponse() as Response;
     res.statusCode = 404; // Set status to 404 Not Found
 
@@ -80,7 +81,7 @@ describe("errorTrackingMiddleware", () => {
   });
 
   it("should call the next middleware function", () => {
-    const req = mockRequest() as CustomRequest;
+    const req = mockRequest() as TrackingCustomErrorRequest;
     const res = mockResponse() as Response;
 
     errorTrackingMiddleware(req, res, mockNext);
@@ -89,7 +90,7 @@ describe("errorTrackingMiddleware", () => {
   });
 
   it("should attach error statistics to the request object", () => {
-    const req = mockRequest() as CustomRequest;
+    const req = mockRequest() as TrackingCustomErrorRequest;
     const res = mockResponse() as Response;
     res.statusCode = 400; // Set status to 400 Bad Request
 
