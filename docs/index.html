@@ -1,0 +1,617 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>system-monitoring documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+	   <link rel="stylesheet" href="./styles/style.css">
+        <link rel="stylesheet" href="./styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="./" class="navbar-brand">system-monitoring documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content getting-started">
+                   <div class="content-data">
+
+<h1>System Monitor Package</h1>
+<p><img src="https://img.shields.io/npm/v/system-monitoring" alt="npm" class="img-responsive"> <img src="https://img.shields.io/npm/l/system-monitoring" alt="npm" class="img-responsive">
+<img src="https://img.shields.io/npm/dw/system-monitoring" alt="npm" class="img-responsive"><img src="https://img.shields.io/github/stars/miladezzat/system-monitoring" alt="GitHub stars" class="img-responsive"></p>
+<p>A lightweight and efficient Node.js library for real-time system monitoring. Track CPU, memory, disk usage, network I/O, and more with ease.</p>
+<p>A Node.js package for monitoring system metrics like CPU usage, memory usage, disk usage, network interfaces, uptime, process information, and temperature. This package provides middleware for Express to gather and expose these system metrics in your web applications.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#system-monitor-package">System Monitor Package</a><ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+<li><a href="#available-metrics">Available Metrics</a></li>
+<li><a href="#express-middlewares">Express Middlewares</a></li>
+<li><a href="#middlewares">Middlewares</a><ul>
+<li><a href="#error-tracking-middleware">Error Tracking Middleware</a><ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#customrequest-interface"><code>CustomRequest</code> Interface</a></li>
+<li><a href="#createerrortrackingmiddleware-function"><code>createErrorTrackingMiddleware</code> Function</a></li>
+</ul>
+</li>
+<li><a href="#tracktime">trackTime</a><ul>
+<li><a href="#notes">Notes</a></li>
+</ul>
+</li>
+<li><a href="#trackrequestresponsetime">trackRequestResponseTime</a></li>
+</ul>
+</li>
+<li><a href="#apis">APIs</a></li>
+<li><a href="#middlewares-1">Middlewares</a><ul>
+<li><a href="#some-response-examples">Some Response Examples</a></li>
+</ul>
+</li>
+<li><a href="#options">Options</a></li>
+<li><a href="#contributing">Contributing</a></li>
+</ul>
+</li>
+</ul>
+<h2>Installation</h2>
+<p>You can install this package using npm:</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">npm install system-monitoring
+## Or yarn add system-monitoring</code></pre></div><h2>Usage</h2>
+<h3>Basic Usage</h3>
+<p>To use the system-monitoring functions in your project:</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">import { getCpuInfo, getMemoryUsage, getDiskUsage } from &#39;system-monitoring&#39;;
+
+// Get CPU information
+getCpuInfo().then(cpuInfo =&gt; {
+  console.log(&#39;CPU Information:&#39;, cpuInfo);
+});
+
+// Get memory usage
+getMemoryUsage().then(memoryUsage =&gt; {
+  console.log(&#39;Memory Usage:&#39;, memoryUsage);
+});
+
+// Get disk usage
+const diskUsage = getDiskUsage();
+console.log(&#39;Disk Usage:&#39;, diskUsage);</code></pre></div><h2>Available Metrics</h2>
+<p>You can retrieve the following system metrics using the provided functions:</p>
+<ol>
+<li><strong>CPU Information</strong>: Get detailed CPU usage information for each core, including user/system/idle times and percentages.</li>
+<li><strong>Memory Usage</strong>: Get total, free, and used memory statistics.</li>
+<li><strong>Disk Usage</strong>: Get total, used, and available disk space.</li>
+<li><strong>Network Interfaces</strong>: Get details about the system’s network interfaces.</li>
+<li><strong>Uptime</strong>: Get the system’s uptime in seconds.</li>
+<li><strong>Process Info</strong>: Get the CPU and memory usage of the current Node.js process.</li>
+<li><strong>System Temperature</strong>: Get the current temperature of the system (if supported).</li>
+<li><strong>Logs</strong>: Fetch system logs from a specific file with optional keyword filtering.</li>
+</ol>
+<h2>Express Middlewares</h2>
+<p>This package provides an Express middleware to gather and expose system metrics.</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">import express from &#39;express&#39;;
+import { systemMonitor, trackRequestResponseTime, createErrorTrackingMiddleware } from &#39;system-monitoring&#39;;
+
+const errorTrackingMiddleware: ReturnType&lt;typeof createErrorTrackingMiddleware&gt; = createErrorTrackingMiddleware();
+
+const app = express();
+
+// Middleware to track response time
+app.use(trackRequestResponseTime()); // the time will append on the response header X-Response-Time
+
+// track error rate
+app.use(errorTrackingMiddleware) // access information by  req.errorResponse
+
+// System monitor middleware
+app.use(systemMonitor({ cpu: true, memory: true, disk: true })); // access information by req.systemMetrics
+
+app.get(&#39;/&#39;, (req, res) =&gt; {
+  res.send(&#39;System monitoring active.&#39;);
+});
+
+app.listen(3000, () =&gt; {
+  console.log(&#39;Server is running on port 3000&#39;);
+});</code></pre></div><h2>Middlewares</h2>
+<h3>Error Tracking Middleware</h3>
+<p>This middleware tracks error statistics for your Express application by intercepting responses and recording error occurrences. It provides detailed insights into the total number of requests, error count, error rate, and the specific routes that are causing errors.</p>
+<h4>Overview</h4>
+<ul>
+<li><code>CustomRequest</code> Interface: Extends the default Express <code>Request</code> object to include an optional errorResponse property for error statistics.</li>
+<li><code>createErrorTrackingMiddleware</code> Function: Creates an error tracking middleware with isolated state for tracking errors in your Express application.</li>
+</ul>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>totalRequests</code></td>
+<td><code>number</code></td>
+<td><code>0</code></td>
+<td>The total number of requests processed.</td>
+</tr>
+<tr>
+<td><code>errorCount</code></td>
+<td><code>number</code></td>
+<td><code>0</code></td>
+<td>The total number of error responses (status code 400 and above).</td>
+</tr>
+<tr>
+<td><code>errorRate</code></td>
+<td><code>string</code></td>
+<td><code>0.00%</code></td>
+<td>The percentage of error responses relative to total requests.</td>
+</tr>
+<tr>
+<td><code>errorRoutes</code></td>
+<td><code>{ [key: string]: number }</code></td>
+<td><code>{}</code></td>
+<td>An object mapping routes to the number of errors encountered at each route.</td>
+</tr>
+</tbody>
+</table>
+<h4><code>CustomRequest</code> Interface</h4>
+<p>The CustomRequest interface extends the standard Express Request object to include an errorResponse property. This property is used to store error tracking information:</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">export interface CustomRequest extends Request {
+  errorResponse?: {
+    totalRequests: number;
+    errorCount: number;
+    errorRate: string;
+    errorRoutes: { [key: string]: number };
+  };
+}</code></pre></div><h4><code>createErrorTrackingMiddleware</code> Function</h4>
+<p>This factory function creates an Express middleware function that tracks error statistics. It maintains an in-memory state to count total requests, errors, and error rates. The middleware also tracks errors by route.</p>
+<ul>
+<li><strong>Usage</strong></li>
+</ul>
+<ol>
+<li>Import the Middleware: Import the <code>createErrorTrackingMiddleware</code> function into your Express application.</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">import { createErrorTrackingMiddleware } from &#39;system-monitoring&#39;;</code></pre></div><ol start="2">
+<li>Add Middleware to Your Application: Use the middleware in your Express application.</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">const app = express();
+app.use(createErrorTrackingMiddleware());</code></pre></div><ol start="3">
+<li>Access Error Statistics: You can access error statistics via the <code>errorResponse</code> property on the <code>req</code> object within your route handlers or other middleware.</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">app.get(&#39;/some-route&#39;, (req: CustomRequest, res: Response) =&gt; {
+  // Access error statistics
+  const errorStats = req.errorResponse;
+  console.log(&#39;Error Statistics:&#39;, errorStats);
+  
+  res.send(&#39;Response body&#39;);
+});</code></pre></div><ul>
+<li>Note: Future adding, will add appility to adding on file or db like trackTime</li>
+</ul>
+<h3>trackTime</h3>
+<p><code>trackTime</code> is a middleware function for Express.js that tracks the response time for each request and provides the ability to log the data either to a file or to a database via a callback function.</p>
+<ol>
+<li>Import the middleware into your Express app.</li>
+<li>You can configure trackTime to log the response times to a file, send them to a database, or both.</li>
+</ol>
+<p><strong>Example Code</strong></p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">import express from &#39;express&#39;;
+import { trackTime } from &#39;./middlewares/trackTime&#39;;
+
+const app = express();
+
+// Example database storage function (optional)
+function storeOnDb(logData: { method: string; url: string; responseTime: string; timestamp: string }) {
+  // Simulate storing in a database (replace this with your actual DB logic)
+  console.log(&#39;Storing log in the database:&#39;, logData);
+}
+
+// Use the middleware to track request/response time
+app.use(trackTime({
+  filePath: &#39;./logs/request_logs.txt&#39;, // Optional: Logs to a file
+  storeOnDb: storeOnDb                 // Optional: Callback to store logs in a database
+}));
+
+// Example route
+app.get(&#39;/&#39;, (req, res) =&gt; {
+  res.send(&#39;Hello, World!&#39;);
+});
+
+// Start the server
+app.listen(3000, () =&gt; {
+  console.log(&#39;Server is running on port 3000&#39;);
+});</code></pre></div><p><strong>Track Time Middleware Options</strong>
+You can configure the behavior of the <code>trackTime</code> middleware by passing an options object with the following properties:</p>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code> (optional)</td>
+<td>The path where logs will be written. If provided, the middleware will log each request to this file in JSON format.</td>
+</tr>
+<tr>
+<td><code>storeOnDb</code></td>
+<td><code>(logData: LogData) =&gt; void</code> (optional)</td>
+<td>A callback function that receives the log data for storing in a database. This function will be called every time a request finishes.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Log Data Structure</strong>
+The log data passed to the file or the storeOnDb function will have the following structure:</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">interface LogData {
+  method: string;       // HTTP method (e.g., GET, POST)
+  url: string;          // The URL requested
+  responseTime: string; // Time taken to process the request in milliseconds
+  timestamp: string;    // ISO timestamp when the request was made
+}</code></pre></div><p><strong>Logging Options</strong></p>
+<ol>
+<li><strong>Logging to a File:</strong> If you provide the filePath option, the logs will be written to the specified file in JSON format. Each log entry will be appended to the file on a new line.
+Example log entry:</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-json">{&quot;method&quot;:&quot;GET&quot;,&quot;url&quot;:&quot;/&quot;,&quot;responseTime&quot;:&quot;12.345&quot;,&quot;timestamp&quot;:&quot;2024-09-15T10:30:00.123Z&quot;}</code></pre></div><ol start="2">
+<li><strong>Storing in a Database:</strong> If you pass a storeOnDb callback function, it will be called with the log data. You can implement your own logic to store this data in a database (e.g., MongoDB, MySQL).</li>
+</ol>
+<p>Example of Custom Database Storage Function</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-ts">// Example function to store log data in a MongoDB database
+import { MongoClient } from &#39;mongodb&#39;;
+
+async function storeLogInDb(logData: LogData) {
+  const client = await MongoClient.connect(&#39;mongodb://localhost:27017&#39;);
+  const db = client.db(&#39;logsDatabase&#39;);
+  await db.collection(&#39;requestLogs&#39;).insertOne(logData);
+  await client.close();
+}
+
+// Pass this function to the `trackTime` middleware
+app.use(trackTime({ storeOnDb: storeLogInDb }));</code></pre></div><h4>Notes</h4>
+<ul>
+<li><strong>File Path:</strong> Ensure that the file path exists or is writable by your application. If the path does not exist, the middleware will automatically create the directory.</li>
+<li><strong>Performance Considerations:</strong> If you log data to a file or database on every request, ensure your storage mechanism can handle the load without affecting performance.</li>
+</ul>
+<h3>trackRequestResponseTime</h3>
+<p>// will write docs here</p>
+<h2>APIs</h2>
+<p><strong>System Monitoring Functions</strong></p>
+<ul>
+<li><strong>getCpuInfo()</strong>: Returns CPU usage details for all cores and the system as a whole.</li>
+<li><strong>getMemoryUsage()</strong>: Retrieves total, free, and used memory information.</li>
+<li><strong>getDiskUsage()</strong>: Fetches disk usage statistics including total, used, and available space.</li>
+<li><strong>getNetworkInfo()</strong>: Returns details about all network interfaces.</li>
+<li><strong>getSystemUptime()</strong>: Returns the system uptime in seconds.</li>
+<li><strong>getProcessInfo()</strong>: Provides the CPU and memory usage of the current process.</li>
+<li><strong>getOSInfo</strong>: Retrieves detailed information about the operating system.</li>
+<li><strong>getLoadAverage</strong>: Retrieves the system load averages over 1, 5, and 15 minutes.</li>
+<li><strong>getUserInfo</strong>: Retrieves extended user information and system details.</li>
+<li><strong>getTemperature()</strong>: Returns the system temperature (if supported).</li>
+<li><strong>getFileSystemInfo</strong>: Retrieves information about the file system, including disk space usage.</li>
+<li><strong>getActiveConnections</strong>: Retrieves the active network connections on the system.</li>
+<li><strong>getScheduledTasks</strong>: Retrieves a list of scheduled tasks from the system and parses them into an object.</li>
+<li><strong>getServiceStatus</strong>: Retrieves the status of a given service.</li>
+<li><strong>getLogs(path, keyword)</strong>: Fetches logs from the specified file, optionally filtering by a keyword.</li>
+</ul>
+<h2>Middlewares</h2>
+<ul>
+<li><strong>systemMonitor</strong>: System monitor middleware for gathering system metrics.</li>
+<li><strong>trackTime</strong>: Middleware to track request/response time. Logs can either be stored in a file or sent to a database via a callback.</li>
+<li><strong>createErrorTrackingMiddleware</strong>: Factory function to create error tracking middleware with isolated state</li>
+<li><strong>trackRequestResponseTime</strong>: Middleware to track request and response time. and adding the response time to response header in ms</li>
+</ul>
+<h3>Some Response Examples</h3>
+<ol>
+<li>CPU Information</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-json">{
+  &quot;totalUserTime&quot;: 123456,
+  &quot;totalSystemTime&quot;: 654321,
+  &quot;totalIdleTime&quot;: 789012,
+  &quot;totalTime&quot;: 1567890,
+  &quot;usedTime&quot;: 777777,
+  &quot;idleTime&quot;: 789012,
+  &quot;usagePercentage&quot;: 49.5,
+  &quot;coreDetails&quot;: [
+    {
+      &quot;coreId&quot;: 0,
+      &quot;userTime&quot;: 12345,
+      &quot;systemTime&quot;: 6543,
+      &quot;idleTime&quot;: 7890,
+      &quot;totalTime&quot;: 15678,
+      &quot;usagePercentage&quot;: 51.4
+    }
+    // more cores...
+  ]
+}</code></pre></div><ol start="2">
+<li>Memory Usage</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-json">{
+    &quot;totalMemory&quot;: 16777216,
+    &quot;freeMemory&quot;: 8388608,
+    &quot;usedMemory&quot;: 8388608
+}</code></pre></div><ol start="3">
+<li>Disk Usage</li>
+</ol>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-json">{
+  &quot;total&quot;: 104857600,
+  &quot;used&quot;: 52428800,
+  &quot;available&quot;: 52428800
+}</code></pre></div><h2>Options</h2>
+<p>The <code>systemMonitor</code> middleware accepts an object with the following options:</p>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cpu</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable CPU usage monitoring.</td>
+</tr>
+<tr>
+<td><code>memory</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable memory usage monitoring.</td>
+</tr>
+<tr>
+<td><code>disk</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable disk usage monitoring.</td>
+</tr>
+<tr>
+<td><code>network</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable network interface information monitoring.</td>
+</tr>
+<tr>
+<td><code>uptime</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable system uptime monitoring.</td>
+</tr>
+<tr>
+<td><code>processInfo</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable process CPU and memory usage monitoring.</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable system temperature monitoring (only on Linux/Windows).</td>
+</tr>
+<tr>
+<td><code>osInfo</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable operating system information monitoring.</td>
+</tr>
+<tr>
+<td><code>loadAverage</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable load average monitoring.</td>
+</tr>
+<tr>
+<td><code>userInfo</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable user information monitoring.</td>
+</tr>
+<tr>
+<td><code>fileSystemInfo</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable file system information monitoring.</td>
+</tr>
+<tr>
+<td><code>activeConnections</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable active network connections monitoring.</td>
+</tr>
+<tr>
+<td><code>scheduledTasks</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable scheduled tasks monitoring.</td>
+</tr>
+<tr>
+<td><code>logs</code></td>
+<td><code>{ path: string, keyword?: string }</code></td>
+<td><code>null</code></td>
+<td>Fetch logs from a specified file, optionally filtered by keyword.</td>
+</tr>
+<tr>
+<td><code>responseTime</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Track response time for each request.</td>
+</tr>
+</tbody>
+</table>
+<h2>Contributing</h2>
+<p>Contributions are welcome! If you have any bug reports, suggestions, or feature requests, please open an issue on GitHub.</p>
+<p><strong>To contribute:</strong></p>
+<ol>
+<li>Fork the repository</li>
+<li>Create a new feature branch (<code>git checkout -b feature/new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -m &#39;Add new feature&#39;</code>)</li>
+<li>Push to the branch (<code>git push origin feature/new-feature</code>)</li>
+<li>Create a new Pull Request</li>
+</ol>
+<p>Make sure to follow the <a href="./CONTRIBUTER.md">Contributor Covenant Code of Conduct</a> when participating in the project.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 0;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'getting-started';
+            var COMPODOC_CURRENT_PAGE_URL = 'index.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="./js/libs/custom-elements.min.js"></script>
+       <script src="./js/libs/lit-html.js"></script>
+
+       <script src="./js/menu-wc.js" defer></script>
+       <script nomodule src="./js/menu-wc_es5.js" defer></script>
+
+       <script src="./js/libs/bootstrap-native.js"></script>
+
+       <script src="./js/libs/es6-shim.min.js"></script>
+       <script src="./js/libs/EventDispatcher.js"></script>
+       <script src="./js/libs/promise.min.js"></script>
+       <script src="./js/libs/zepto.min.js"></script>
+
+       <script src="./js/compodoc.js"></script>
+
+       <script src="./js/tabs.js"></script>
+       <script src="./js/menu.js"></script>
+       <script src="./js/libs/clipboard.min.js"></script>
+       <script src="./js/libs/prism.js"></script>
+       <script src="./js/sourceCode.js"></script>
+          <script src="./js/search/search.js"></script>
+          <script src="./js/search/lunr.min.js"></script>
+          <script src="./js/search/search-lunr.js"></script>
+          <script src="./js/search/search_index.js"></script>
+       <script src="./js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

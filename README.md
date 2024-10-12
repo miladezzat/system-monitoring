@@ -1,8 +1,7 @@
 # System Monitor Package
+![npm](https://img.shields.io/npm/v/system-monitoring) ![npm](https://img.shields.io/npm/l/system-monitoring)
+![npm](https://img.shields.io/npm/dw/system-monitoring)![GitHub stars](https://img.shields.io/github/stars/miladezzat/system-monitoring)
 
-[![npm version](https://badge.fury.io/js/system-monitoring.svg)](https://www.npmjs.com/package/system-monitoring)
-<!-- [![License](https://img.shields.io/npm/l/system-monitoring)](LICENSE) -->
-[![Downloads](https://img.shields.io/npm/dt/system-monitoring)](https://www.npmjs.com/package/system-monitoring)
 
 A lightweight and efficient Node.js library for real-time system monitoring. Track CPU, memory, disk usage, network I/O, and more with ease.
 

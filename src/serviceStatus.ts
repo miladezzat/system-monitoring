@@ -1,9 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+import { ServiceStatus, SystemMonitorError } from "./types"; // Import the custom error class
 
 const execPromise = promisify(exec);
-
-export type ServiceStatus = "running" | "inactive" | "unknown";
 
 /**
  * Retrieves the status of a given service.
@@ -11,12 +10,17 @@ export type ServiceStatus = "running" | "inactive" | "unknown";
  * - On Windows, it uses the `sc query` command to check the service status.
  * - On Unix-based systems, it uses the `systemctl is-active` command to determine if the service is active.
  *
- * @param serviceName - The name of the service whose status is to be checked.
+ * @param {string} serviceName - The name of the service whose status is to be checked.
  * @returns {Promise<ServiceStatus>} - A promise that resolves to the service status:
  *   - `'running'` if the service is running,
  *   - `'inactive'` if the service is not running,
  *   - `'unknown'` if the status could not be determined or an error occurred.
- * @throws {Error} - Throws an error if the command execution fails or an unknown error occurs.
+ * @throws {SystemMonitorError} - Throws a structured error if the command execution fails or an unknown error occurs.
+ *
+ * @example
+ * getServiceStatus('nginx')
+ *   .then(status => console.log(`Service status: ${status}`))
+ *   .catch(error => console.error('Error checking service status:', error));
  */
 export async function getServiceStatus(
   serviceName: string,
@@ -30,10 +34,11 @@ export async function getServiceStatus(
   try {
     const { stdout, stderr } = await execPromise(cmd);
 
-    // If there’s any error output (stderr), treat it as an error
+    // If there's any error output (stderr), treat it as an error
     if (stderr) {
-      throw new Error(
+      throw new SystemMonitorError(
         `Error occurred while checking service status: ${stderr}`,
+        "ServiceStatusCheckError",
       );
     }
 
@@ -44,12 +49,14 @@ export async function getServiceStatus(
       // On Unix-based systems, check if the output is 'active'
       return stdout.trim() === "active" ? "running" : "inactive";
     }
-  } catch (error) {
-    // Ensure 'error' is treated as an instance of 'Error'
-    if (error instanceof Error) {
-      throw new Error(`Failed to retrieve service status: ${error.message}`);
-    } else {
-      throw new Error("An unknown error occurred");
-    }
+  } catch (error: unknown) {
+    // Handle and throw custom SystemMonitorError
+    throw new SystemMonitorError(
+      `Failed to retrieve service status: ${(error as Error)?.message || String(error)}`,
+      "ServiceStatusRetrievalError",
+      (error as Error)?.stack,
+    );
   }
 }
+
+export default getServiceStatus;

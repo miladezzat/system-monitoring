@@ -1,13 +1,6 @@
 import os from "os";
+import { LoadAverage, SystemMonitorError } from "./types";
 
-/**
- * Type definition for load average information.
- */
-export interface LoadAverage {
-  load1min: number;
-  load5min: number;
-  load15min: number;
-}
 /**
  * Retrieves the system load averages over 1, 5, and 15 minutes.
  *
@@ -30,13 +23,35 @@ export interface LoadAverage {
  *  - `load1min` (number): System load over the last 1 minute.
  *  - `load5min` (number): System load over the last 5 minutes.
  *  - `load15min` (number): System load over the last 15 minutes.
+ *
+ * @throws {SystemMonitorError} If there is an issue retrieving the load averages,
+ * a custom error is thrown with details about the failure, including the error message and stack trace.
+ *
+ * @example
+ * try {
+ *   const loadAverage = getLoadAverage();
+ *   console.log('Load Average:', loadAverage);
+ * } catch (error) {
+ *   console.error('Failed to retrieve load average:', error);
+ * }
  */
 export function getLoadAverage(): LoadAverage {
-  const [load1min, load5min, load15min] = os.loadavg();
+  try {
+    const [load1min, load5min, load15min] = os.loadavg();
 
-  return {
-    load1min,
-    load5min,
-    load15min,
-  };
+    return {
+      load1min,
+      load5min,
+      load15min,
+    };
+  } catch (error: unknown) {
+    // Handle and throw custom SystemMonitorError
+    throw new SystemMonitorError(
+      `Failed to retrieve load averages: ${(error as Error)?.message || String(error)}`,
+      "LoadAverageError",
+      (error as Error)?.stack,
+    );
+  }
 }
+
+export default getLoadAverage;

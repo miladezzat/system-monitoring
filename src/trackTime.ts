@@ -2,32 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import fs from "fs";
 import path from "path";
-
-/**
- * Options for tracking request/response time.
- * @typedef {Object} TrackTimeOptions
- * @property {string} [filePath] - The path to the file where logs should be stored.
- * @property {(logData: LogData) => void} [storeOnDb] - Callback function to store log data in a database.
- */
-export interface TrackTimeOptions {
-  filePath?: string;
-  storeOnDb?: (logData: LogData) => void;
-}
-
-/**
- * Log data structure.
- * @typedef {Object} LogData
- * @property {string} method - The HTTP method of the request.
- * @property {string} url - The requested URL.
- * @property {string} responseTime - The response time in milliseconds.
- * @property {string} timestamp - The timestamp of the request.
- */
-export interface LogData {
-  method: string;
-  url: string;
-  responseTime: string;
-  timestamp: string;
-}
+import { LogData, TrackTimeOptions } from "./types";
 
 /**
  * Writes log data to a specified file in JSON format.
@@ -38,7 +13,7 @@ export interface LogData {
 function logToFile(logData: LogData, filePath: string): void {
   const dir = path.dirname(filePath);
 
-  // Ensure the log directory exists, if not, create it
+  // Ensure the log directory exists; if not, create it
   if (!fs.existsSync(dir)) {
     try {
       fs.mkdirSync(dir, { recursive: true });
@@ -61,10 +36,16 @@ function logToFile(logData: LogData, filePath: string): void {
 
 /**
  * Middleware to track request/response time.
- * Logs can either be stored in a file or sent to a database via a callback.
+ *
+ * This middleware logs the time taken for each request to complete and
+ * can store logs either in a file or by invoking a provided callback function
+ * to store the log data in a database.
  *
  * @param {TrackTimeOptions} options - Options to configure logging behavior.
- * @returns {(req: Request, res: Response, next: NextFunction) => void} - Express middleware function.
+ * @returns {(req: Request, res: Response, next: NextFunction) => void} - An Express middleware function.
+ *
+ * @example
+ * app.use(trackTime({ filePath: 'logs/requests.log' }));
  */
 export function trackTime(options: TrackTimeOptions) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -98,3 +79,5 @@ export function trackTime(options: TrackTimeOptions) {
     next(); // Pass control to the next middleware
   };
 }
+
+export default trackTime;

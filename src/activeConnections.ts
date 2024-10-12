@@ -1,17 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+import { NetworkConnection, SystemMonitorError } from "./types";
 
 const execPromise = promisify(exec);
-
-/**
- * Interface representing a network connection.
- */
-export interface NetworkConnection {
-  protocol: string;
-  localAddress: string;
-  foreignAddress: string;
-  state: string;
-}
 
 /**
  * Retrieves the active network connections on the system.
@@ -21,7 +12,12 @@ export interface NetworkConnection {
  *
  * @param {("json" | "raw")} [format="json"] - The format of the response. Defaults to "json".
  * @returns {Promise<NetworkConnection[] | string>} - A promise that resolves to either a parsed JSON array of network connections or the raw string output.
- * @throws {Error} - Throws an error if the command execution fails or an unknown error occurs.
+ * @throws {SystemMonitorError} - Throws an error if the command execution fails or an unknown error occurs.
+ *
+ * @example
+ * getActiveConnections()
+ *   .then(connections => console.log(connections))
+ *   .catch(error => console.error('Error retrieving active connections:', error));
  */
 export async function getActiveConnections(
   format: "json" | "raw" = "json",
@@ -35,8 +31,9 @@ export async function getActiveConnections(
     const { stdout, stderr } = await execPromise(cmd);
 
     if (stderr) {
-      throw new Error(
+      throw new SystemMonitorError(
         `Error occurred while fetching active connections: ${stderr}`,
+        "ActiveConnectionsRetrievalError",
       );
     }
 
@@ -47,16 +44,14 @@ export async function getActiveConnections(
 
     // Otherwise, process the command output and return it in JSON format
     const connections = parseNetstatOutput(stdout);
-
     return connections;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(
-        `Failed to retrieve active connections: ${error.message}`,
-      );
-    } else {
-      throw new Error("An unknown error occurred");
-    }
+  } catch (error: unknown) {
+    // Handle and throw custom SystemMonitorError
+    throw new SystemMonitorError(
+      `Failed to retrieve active connections: ${(error as Error)?.message || String(error)}`,
+      "ActiveConnectionsRetrievalError",
+      (error as Error)?.stack,
+    );
   }
 }
 
@@ -65,6 +60,7 @@ export async function getActiveConnections(
  *
  * @param {string} output - The raw output from the `netstat` command.
  * @returns {NetworkConnection[]} - An array of objects representing the active connections.
+ * @throws {Error} - Throws an error if the output cannot be parsed correctly.
  */
 export function parseNetstatOutput(output: string): NetworkConnection[] {
   const lines = output.trim().split("\n");
@@ -100,3 +96,5 @@ export function parseNetstatOutput(output: string): NetworkConnection[] {
     }
   });
 }
+
+export default getActiveConnections;

@@ -1,16 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+import { FileSystemInfo, SystemMonitorError } from "./types";
 
 const execPromise = promisify(exec);
-
-/**
- * Interface representing a file system's information.
- */
-export interface FileSystemInfo {
-  caption: string; // Drive or File System Name
-  size: string; // Total size of the file system or disk
-  freeSpace: string; // Available free space
-}
 
 /**
  * Retrieves information about the file system, including disk space usage.
@@ -20,7 +12,12 @@ export interface FileSystemInfo {
  *
  * @param {("json" | "raw")} [format="json"] - The format of the response. Defaults to "json".
  * @returns {Promise<FileSystemInfo[] | string>} - A promise that resolves to either a parsed JSON array or the raw string output.
- * @throws {Error} - Throws an error if the command execution fails.
+ * @throws {SystemMonitorError} - Throws an error if the command execution fails.
+ *
+ * @example
+ * getFileSystemInfo()
+ *   .then(info => console.log(info))
+ *   .catch(error => console.error('Error retrieving file system info:', error));
  */
 export async function getFileSystemInfo(
   format: "json" | "raw" = "json",
@@ -34,8 +31,9 @@ export async function getFileSystemInfo(
     const { stdout, stderr } = await execPromise(cmd);
 
     if (stderr) {
-      throw new Error(
+      throw new SystemMonitorError(
         `Error occurred while fetching file system info: ${stderr}`,
+        "FileSystemInfoRetrievalError",
       );
     }
 
@@ -46,14 +44,14 @@ export async function getFileSystemInfo(
 
     // Otherwise, process the command output and return it in JSON format
     const fileSystemInfo = parseFileSystemOutput(stdout);
-
     return fileSystemInfo;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to retrieve file system info: ${error.message}`);
-    } else {
-      throw new Error("An unknown error occurred");
-    }
+  } catch (error: unknown) {
+    // Handle and throw custom SystemMonitorError
+    throw new SystemMonitorError(
+      `Failed to retrieve file system info: ${(error as Error)?.message || String(error)}`,
+      "FileSystemInfoRetrievalError",
+      (error as Error)?.stack,
+    );
   }
 }
 
@@ -111,3 +109,5 @@ function formatBytes(bytes: string): string {
   }
   return `${value.toFixed(2)} ${units[unitIndex]}`;
 }
+
+export default getFileSystemInfo;

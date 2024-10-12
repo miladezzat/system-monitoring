@@ -1,10 +1,24 @@
 import os from "os";
 import { execSync } from "child_process";
 import fs from "fs";
+import { SystemMonitorError } from "./types"; // Import the custom error
 
 /**
  * Get system temperature based on the platform.
- * @returns {Promise<number | undefined>} Temperature in Celsius or undefined if not supported.
+ *
+ * This function retrieves the temperature of the CPU or thermal zone, depending on the operating system:
+ * - On Linux, it reads from the thermal zone file.
+ * - On Windows, it uses WMIC to get the temperature.
+ * - On macOS, temperature retrieval is currently not supported.
+ *
+ * @returns {Promise<number | undefined>} Temperature in Celsius or undefined if not supported or an error occurs.
+ *
+ * @throws {SystemMonitorError} If there is an error retrieving the temperature.
+ *
+ * @example
+ * getTemperature()
+ *   .then(temp => console.log(`Current temperature: ${temp}°C`))
+ *   .catch(error => console.error('Error retrieving temperature:', error));
  */
 export async function getTemperature(): Promise<number | undefined> {
   try {
@@ -16,14 +30,10 @@ export async function getTemperature(): Promise<number | undefined> {
         const temp = execSync(`cat ${thermalZonePath}`).toString();
         return parseFloat(temp) / 1000; // Convert from millidegree Celsius
       } else {
-        console.error("Thermal zone file not found on Linux system.");
-        return undefined;
+        return undefined; // Thermal zone file does not exist
       }
     } else if (platform === "darwin") {
-      console.error(
-        "Temperature monitoring is not natively supported on macOS.",
-      );
-      return undefined;
+      return undefined; // Temperature retrieval not supported on macOS
     } else if (platform === "win32") {
       const output = execSync(
         "wmic /namespace:\\\\root\\wmi PATH MSAcpi_ThermalZoneTemperature get CurrentTemperature",
@@ -31,11 +41,16 @@ export async function getTemperature(): Promise<number | undefined> {
       const tempCelsius = parseInt(output.split("\n")[1]) / 10 - 273.15; // Convert from Kelvin to Celsius
       return tempCelsius;
     } else {
-      console.error("Unsupported platform for temperature monitoring.");
-      return undefined;
+      return undefined; // Platform not supported
     }
-  } catch (err) {
-    console.error("Error fetching temperature:", err);
-    return undefined;
+  } catch (error: unknown) {
+    // Handle and throw custom SystemMonitorError
+    throw new SystemMonitorError(
+      `Failed to retrieve system temperature: ${(error as Error)?.message || String(error)}`,
+      "TemperatureRetrievalError",
+      (error as Error)?.stack,
+    );
   }
 }
+
+export default getTemperature;

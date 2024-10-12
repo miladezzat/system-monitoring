@@ -1,0 +1,554 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>system-monitoring documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">system-monitoring documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content miscellaneous-variables">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Miscellaneous</li>
+  <li class="breadcrumb-item">Variables</li>
+</ol>
+
+<section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <ul class="index-list">
+                        <li>
+                            <a href="#createErrorTrackingMiddleware" title="src/errorTrackingMiddleware.ts" ><b>createErrorTrackingMiddleware</b>&nbsp;&nbsp;&nbsp;(src/.../errorTrackingMiddleware.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#defaultOptions" title="src/types.ts" ><b>defaultOptions</b>&nbsp;&nbsp;&nbsp;(src/.../types.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#execPromise" title="src/activeConnections.ts" ><b>execPromise</b>&nbsp;&nbsp;&nbsp;(src/.../activeConnections.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#execPromise" title="src/fileSystemInfo.ts" ><b>execPromise</b>&nbsp;&nbsp;&nbsp;(src/.../fileSystemInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#execPromise" title="src/scheduledTasks.ts" ><b>execPromise</b>&nbsp;&nbsp;&nbsp;(src/.../scheduledTasks.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#execPromise" title="src/serviceStatus.ts" ><b>execPromise</b>&nbsp;&nbsp;&nbsp;(src/.../serviceStatus.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#systemMonitor" title="src/systemMonitor.ts" ><b>systemMonitor</b>&nbsp;&nbsp;&nbsp;(src/.../systemMonitor.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#trackRequestResponseTime" title="src/trackRequestResponseTime.ts" class="deprecated-name"><b>trackRequestResponseTime</b>&nbsp;&nbsp;&nbsp;(src/.../trackRequestResponseTime.ts)</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    <h3>src/errorTrackingMiddleware.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="createErrorTrackingMiddleware"></a>
+                    <span class="name">
+                        <span ><b>createErrorTrackingMiddleware</b></span>
+                        <a href="#createErrorTrackingMiddleware"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>() &#x3D;&gt; {
+  // In-memory storage for error tracking
+  let totalRequests: number &#x3D; 0; // Total number of requests received
+  let errorCount: number &#x3D; 0; // Total number of errors encountered
+  const errorRoutes: { [key: string]: number } &#x3D; {}; // Tracks error counts per route
+
+  return (
+    req: TrackingCustomErrorRequest,
+    res: Response,
+    next: NextFunction,
+  ): void &#x3D;&gt; {
+    totalRequests++; // Increment total request count
+
+    // Save the original res.send method
+    const originalSend &#x3D; res.send;
+
+    /**
+     * Overrides the res.send method to intercept the response.
+     * If the status code indicates an error (4xx or 5xx), it increments the error count
+     * and tracks the route that caused the error. Appends error stats to the req object.
+     *
+     * @param {unknown} body - The response body, which can be of any type.
+     * @returns {Response} - The response object.
+     */
+    res.send &#x3D; function (body: unknown): Response {
+      if (res.statusCode &gt;&#x3D; 400) {
+        // Increment error count if status code indicates an error
+        errorCount++;
+
+        // Capture the route and increment its error count
+        const route &#x3D; req.originalUrl;
+        if (errorRoutes[route]) {
+          errorRoutes[route]++;
+        } else {
+          errorRoutes[route] &#x3D; 1; // Initialize count for the route
+        }
+      }
+
+      // Attach error stats to the request object
+      req.errorResponse &#x3D; {
+        totalRequests,
+        errorCount,
+        errorRate: &#x60;${((errorCount / totalRequests) * 100).toFixed(2)}%&#x60;, // Calculate error rate as a percentage
+        errorRoutes: { ...errorRoutes }, // Clone the errorRoutes object
+      };
+
+      // Call the original res.send with the body
+      return originalSend.apply(this, [body]) as Response;
+    };
+
+    next(); // Pass control to the next middleware
+  };
+}</code>
+                    </td>
+                </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Factory function to create error tracking middleware with isolated state.</p>
+<p>This middleware tracks the total number of requests and counts the number of errors
+that occur during those requests. It also keeps track of the routes that caused errors.</p>
+</div>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/types.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="defaultOptions"></a>
+                    <span class="name">
+                        <span ><b>defaultOptions</b></span>
+                        <a href="#defaultOptions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="../interfaces/MonitorOptions.html" target="_self" >MonitorOptions</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>{
+  cpu: true,
+  memory: true,
+  disk: true,
+  network: true,
+  uptime: true,
+  processInfo: true,
+  osInfo: false,
+  loadAverage: false,
+  userInfo: false,
+  fileSystemInfo: false,
+  activeConnections: false,
+  scheduledTasks: false,
+  temperature: false,
+}</code>
+                    </td>
+                </tr>
+
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/activeConnections.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="execPromise"></a>
+                    <span class="name">
+                        <span ><b>execPromise</b></span>
+                        <a href="#execPromise"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>promisify(exec)</code>
+                    </td>
+                </tr>
+
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/fileSystemInfo.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="execPromise"></a>
+                    <span class="name">
+                        <span ><b>execPromise</b></span>
+                        <a href="#execPromise"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>promisify(exec)</code>
+                    </td>
+                </tr>
+
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/scheduledTasks.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="execPromise"></a>
+                    <span class="name">
+                        <span ><b>execPromise</b></span>
+                        <a href="#execPromise"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>promisify(exec)</code>
+                    </td>
+                </tr>
+
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/serviceStatus.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="execPromise"></a>
+                    <span class="name">
+                        <span ><b>execPromise</b></span>
+                        <a href="#execPromise"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>promisify(exec)</code>
+                    </td>
+                </tr>
+
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/systemMonitor.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="systemMonitor"></a>
+                    <span class="name">
+                        <span ><b>systemMonitor</b></span>
+                        <a href="#systemMonitor"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>(options: MonitorOptions &#x3D; defaultOptions) &#x3D;&gt; {
+  return async (req: Request, res: Response, next: NextFunction) &#x3D;&gt; {
+    const data: MonitorData &#x3D; {};
+
+    try {
+      if (options.cpu) data.cpuInformation &#x3D; await getCpuInfo();
+      if (options.memory) data.memoryUsage &#x3D; await getMemoryUsage();
+      if (options.disk) data.diskUsage &#x3D; await getDiskUsage();
+      if (options.network) data.networkInfo &#x3D; await getNetworkInfo();
+      if (options.uptime) data.uptime &#x3D; await getSystemUptime();
+      if (options.processInfo) data.processInfo &#x3D; await getProcessInfo();
+      if (options.temperature) data.temperature &#x3D; await getTemperature();
+      if (options.osInfo) data.osInfo &#x3D; await getOSInfo();
+      if (options.loadAverage) data.loadAverage &#x3D; await getLoadAverage();
+      if (options.userInfo) data.userInfo &#x3D; await getUserInfo();
+      if (options.fileSystemInfo)
+        data.fileSystemInfo &#x3D; await getFileSystemInfo();
+      if (options.activeConnections)
+        data.activeConnections &#x3D; await getActiveConnections();
+      if (options.logs)
+        data.logs &#x3D; await getLogs(options.logs.path, options.logs.keyword);
+      if (options.scheduledTasks)
+        data.scheduledTasks &#x3D; await getScheduledTasks();
+
+      // Attach the gathered system metrics to the request object
+      (req as Request &amp; { systemMetrics: MonitorData }).systemMetrics &#x3D; data;
+    } catch (err) {
+      console.error(&quot;Error fetching system metrics:&quot;, err);
+    }
+
+    next();
+  };
+}</code>
+                    </td>
+                </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Middleware for gathering system metrics in an Express application.</p>
+<p>This middleware collects various system metrics based on the provided
+options and attaches the data to the request object.</p>
+</div>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+</section>
+    <h3>src/trackRequestResponseTime.ts</h3>
+    <section data-compodoc="block-properties">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="trackRequestResponseTime"></a>
+                    <span class="name">
+                        <span class="deprecated-name"><b>trackRequestResponseTime</b></span>
+                        <a href="#trackRequestResponseTime"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4 deprecated">
+                    [object Object],[object Object],[object Object],[object Object],[object Object]
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>() &#x3D;&gt; {
+  return (
+    req: Request &amp; { responseTime?: number },
+    res: Response,
+    next: NextFunction,
+  ) &#x3D;&gt; {
+    const start &#x3D; process.hrtime(); // Start time measurement
+
+    res.on(&quot;finish&quot;, () &#x3D;&gt; {
+      const end &#x3D; process.hrtime(start); // End time measurement
+      const responseTimeInMs &#x3D; end[0] * 1000 + end[1] / 1e6; // Convert time to milliseconds
+
+      // Set the response time in the response headers
+      res.setHeader(&quot;X-Response-Time&quot;, &#x60;${responseTimeInMs.toFixed(3)}ms&#x60;);
+    });
+
+    next(); // Proceed to the next middleware
+  };
+}</code>
+                    </td>
+                </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Middleware to track request and response time.
+This middleware records the time taken to process a request and appends the response
+time to the response headers.</p>
+</div>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+</section>
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'miscellaneous-variables';
+            var COMPODOC_CURRENT_PAGE_URL = 'variables.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

@@ -8,11 +8,11 @@
       "strict": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
-      "declaration": true, // Ensure .d.ts files are generated
-      "declarationMap": true, // Optional: for better debugging of type definitions
-      "sourceMap": true // Optional: for debugging of JavaScript files
+      "declaration": true,
+      "declarationMap": true,
+      "sourceMap": true
     },
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.test.ts"] // Exclude test files from type checking
+    "exclude": ["node_modules", "**/*.test.ts"]
   }
   

@@ -1,22 +1,17 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+import {
+  ScheduledTask,
+  ScheduledTasksResponse,
+  SystemMonitorError,
+} from "./types"; // Import the custom error class
 
 const execPromise = promisify(exec);
-
-export interface ScheduledTask {
-  name: string;
-  details: string;
-}
-
-export interface ScheduledTasksResponse {
-  tasks: ScheduledTask[];
-  error?: string;
-}
 
 /**
  * Parses the command output into a structured format.
  *
- * @param output - The raw command output as a string.
+ * @param {string} output - The raw command output as a string.
  * @returns {ScheduledTask[]} - An array of objects representing the scheduled tasks.
  */
 function parseTasks(output: string): ScheduledTask[] {
@@ -57,7 +52,12 @@ function parseTasks(output: string): ScheduledTask[] {
  * - On Unix-based systems, it uses `crontab -l` to list the current user's cron jobs.
  *
  * @returns {Promise<ScheduledTasksResponse>} - A promise that resolves to an object containing the list of scheduled tasks.
- * @throws {Error} - Throws an error if the command execution fails or an unknown error occurs.
+ * @throws {SystemMonitorError} - Throws an error if the command execution fails or an unknown error occurs.
+ *
+ * @example
+ * getScheduledTasks()
+ *   .then(response => console.log(response.tasks))
+ *   .catch(error => console.error('Error retrieving scheduled tasks:', error));
  */
 export async function getScheduledTasks(): Promise<ScheduledTasksResponse> {
   // Determine the command to execute based on the operating system
@@ -69,7 +69,7 @@ export async function getScheduledTasks(): Promise<ScheduledTasksResponse> {
   try {
     const { stdout, stderr } = await execPromise(cmd);
 
-    // If there’s any error output (stderr), treat it as an error
+    // If there's any error output (stderr), treat it as an error
     if (stderr) {
       return {
         tasks: [],
@@ -79,14 +79,15 @@ export async function getScheduledTasks(): Promise<ScheduledTasksResponse> {
 
     // Parse the command's standard output
     const tasks = parseTasks(stdout);
-
     return { tasks };
-  } catch (error) {
-    // Ensure 'error' is treated as an instance of 'Error'
-    if (error instanceof Error) {
-      throw new Error(`Failed to retrieve scheduled tasks: ${error.message}`);
-    } else {
-      throw new Error("An unknown error occurred");
-    }
+  } catch (error: unknown) {
+    // Handle and throw custom SystemMonitorError
+    throw new SystemMonitorError(
+      `Failed to retrieve scheduled tasks: ${(error as Error)?.message || String(error)}`,
+      "ScheduledTasksRetrievalError",
+      (error as Error)?.stack,
+    );
   }
 }
+
+export default getScheduledTasks;

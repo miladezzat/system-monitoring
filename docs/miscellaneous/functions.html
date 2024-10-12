@@ -1,0 +1,1604 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>system-monitoring documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">system-monitoring documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content miscellaneous-functions">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Miscellaneous</li>
+  <li class="breadcrumb-item">Functions</li>
+</ol>
+
+<section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <ul class="index-list">
+                        <li>
+                            <a href="#formatBytes" title="src/fileSystemInfo.ts" ><b>formatBytes</b>&nbsp;&nbsp;&nbsp;(src/.../fileSystemInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getActiveConnections" title="src/activeConnections.ts" ><b>getActiveConnections</b>&nbsp;&nbsp;&nbsp;(src/.../activeConnections.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getCpuInfo" title="src/cpuUsage.ts" ><b>getCpuInfo</b>&nbsp;&nbsp;&nbsp;(src/.../cpuUsage.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getDiskUsage" title="src/diskUsage.ts" ><b>getDiskUsage</b>&nbsp;&nbsp;&nbsp;(src/.../diskUsage.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getFileSystemInfo" title="src/fileSystemInfo.ts" ><b>getFileSystemInfo</b>&nbsp;&nbsp;&nbsp;(src/.../fileSystemInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getLoadAverage" title="src/loadAverage.ts" ><b>getLoadAverage</b>&nbsp;&nbsp;&nbsp;(src/.../loadAverage.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getLogs" title="src/logs.ts" ><b>getLogs</b>&nbsp;&nbsp;&nbsp;(src/.../logs.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getMemoryUsage" title="src/memoryUsage.ts" ><b>getMemoryUsage</b>&nbsp;&nbsp;&nbsp;(src/.../memoryUsage.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getNetworkInfo" title="src/networkInfo.ts" ><b>getNetworkInfo</b>&nbsp;&nbsp;&nbsp;(src/.../networkInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getOSInfo" title="src/osInfo.ts" ><b>getOSInfo</b>&nbsp;&nbsp;&nbsp;(src/.../osInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getProcessInfo" title="src/processInfo.ts" ><b>getProcessInfo</b>&nbsp;&nbsp;&nbsp;(src/.../processInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getScheduledTasks" title="src/scheduledTasks.ts" ><b>getScheduledTasks</b>&nbsp;&nbsp;&nbsp;(src/.../scheduledTasks.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getServiceStatus" title="src/serviceStatus.ts" ><b>getServiceStatus</b>&nbsp;&nbsp;&nbsp;(src/.../serviceStatus.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getSystemUptime" title="src/uptime.ts" ><b>getSystemUptime</b>&nbsp;&nbsp;&nbsp;(src/.../uptime.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getTemperature" title="src/temperature.ts" ><b>getTemperature</b>&nbsp;&nbsp;&nbsp;(src/.../temperature.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#getUserInfo" title="src/userInfo.ts" ><b>getUserInfo</b>&nbsp;&nbsp;&nbsp;(src/.../userInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#logToFile" title="src/trackTime.ts" ><b>logToFile</b>&nbsp;&nbsp;&nbsp;(src/.../trackTime.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#parseDiskUsage" title="src/diskUsage.ts" ><b>parseDiskUsage</b>&nbsp;&nbsp;&nbsp;(src/.../diskUsage.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#parseFileSystemOutput" title="src/fileSystemInfo.ts" ><b>parseFileSystemOutput</b>&nbsp;&nbsp;&nbsp;(src/.../fileSystemInfo.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#parseNetstatOutput" title="src/activeConnections.ts" ><b>parseNetstatOutput</b>&nbsp;&nbsp;&nbsp;(src/.../activeConnections.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#parseTasks" title="src/scheduledTasks.ts" ><b>parseTasks</b>&nbsp;&nbsp;&nbsp;(src/.../scheduledTasks.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#trackTime" title="src/trackTime.ts" ><b>trackTime</b>&nbsp;&nbsp;&nbsp;(src/.../trackTime.ts)</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    <h3>src/fileSystemInfo.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="formatBytes"></a>
+                    <span class="name">
+                        <span ><b>formatBytes</b></span>
+                        <a href="#formatBytes"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>formatBytes(bytes: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Helper function to format bytes into human-readable form (e.g., KB, MB, GB).
+This is mainly for the Windows output since <code>df -h</code> already formats it.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>bytes</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The size in bytes.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>The size formatted in human-readable form.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getFileSystemInfo"></a>
+                    <span class="name">
+                        <span ><b>getFileSystemInfo</b></span>
+                        <a href="#getFileSystemInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getFileSystemInfo(format)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves information about the file system, including disk space usage.</p>
+<ul>
+<li>On Windows, it uses <code>wmic</code> to get the size, free space, and caption of logical disks.</li>
+<li>On Unix-based systems, it uses the <code>df -h</code> command to display the file system usage in a human-readable format.</li>
+</ul>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td>Optional</td>
+                                                <td>Default value</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>format</td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+                                            <td>
+                                                    <code>&quot;json&quot;</code>
+                                            </td>
+
+                                            <td>
+                                                    <ul>
+<li>The format of the response. Defaults to &quot;json&quot;.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;[] | string&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>A promise that resolves to either a parsed JSON array or the raw string output.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="parseFileSystemOutput"></a>
+                    <span class="name">
+                        <span ><b>parseFileSystemOutput</b></span>
+                        <a href="#parseFileSystemOutput"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>parseFileSystemOutput(output: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Parses the output from the <code>wmic</code> or <code>df -h</code> command into a structured JSON format.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>output</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The raw output from the command.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/FileSystemInfo.html" target="_self" >FileSystemInfo[]</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>An array of objects representing the file system information.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/activeConnections.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getActiveConnections"></a>
+                    <span class="name">
+                        <span ><b>getActiveConnections</b></span>
+                        <a href="#getActiveConnections"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getActiveConnections(format)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves the active network connections on the system.</p>
+<ul>
+<li>On Windows, it uses the <code>netstat</code> command to get network connections.</li>
+<li>On Unix-based systems, it uses <code>netstat -tn</code> to list TCP connections in numeric form.</li>
+</ul>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                            <td>Optional</td>
+                                                <td>Default value</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>format</td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+                                            <td>
+                                                    <code>&quot;json&quot;</code>
+                                            </td>
+
+                                            <td>
+                                                    <ul>
+<li>The format of the response. Defaults to &quot;json&quot;.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;[] | string&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>A promise that resolves to either a parsed JSON array of network connections or the raw string output.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="parseNetstatOutput"></a>
+                    <span class="name">
+                        <span ><b>parseNetstatOutput</b></span>
+                        <a href="#parseNetstatOutput"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>parseNetstatOutput(output: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Parses the output from the <code>netstat</code> command into a structured JSON format.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>output</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The raw output from the <code>netstat</code> command.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/NetworkConnection.html" target="_self" >NetworkConnection[]</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>An array of objects representing the active connections.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/cpuUsage.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getCpuInfo"></a>
+                    <span class="name">
+                        <span ><b>getCpuInfo</b></span>
+                        <a href="#getCpuInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getCpuInfo()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Asynchronously retrieves detailed CPU information, including total and per-core statistics.
+It gathers information like total CPU time, idle time, user/system time, and CPU usage percentages.</p>
+<p>The function provides an overall summary of the CPU, as well as core-specific data.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/CpuInfo.html" target="_self" >Promise&lt;CpuInfo&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>A promise that resolves to an object containing detailed CPU statistics.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/diskUsage.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getDiskUsage"></a>
+                    <span class="name">
+                        <span ><b>getDiskUsage</b></span>
+                        <a href="#getDiskUsage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getDiskUsage()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves detailed disk usage data by executing a system command.
+Parses the output of the &#39;df -k&#39; command to extract information such as filesystem type,
+total size, used space, available space, usage percentage, and mount point for each partition.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>[] | null</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>An array of disk usage information for each partition,
+or null in case of an error.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="parseDiskUsage"></a>
+                    <span class="name">
+                        <span ><b>parseDiskUsage</b></span>
+                        <a href="#parseDiskUsage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>parseDiskUsage(output: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Parses the output of the &#39;df -k&#39; command to extract disk usage details for each partition.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>output</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The output string from the &#39;df -k&#39; command.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>EnhancedDiskUsage[]</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>An array of parsed disk usage information.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/loadAverage.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getLoadAverage"></a>
+                    <span class="name">
+                        <span ><b>getLoadAverage</b></span>
+                        <a href="#getLoadAverage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getLoadAverage()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves the system load averages over 1, 5, and 15 minutes.</p>
+<p>The load average represents the average number of processes that are either
+in a runnable or uninterruptible state. It gives an indication of how busy
+the system is.</p>
+<ul>
+<li><code>load1min</code>: The average number of processes over the last minute.</li>
+<li><code>load5min</code>: The average number of processes over the last 5 minutes.</li>
+<li><code>load15min</code>: The average number of processes over the last 15 minutes.</li>
+</ul>
+<p>These values are useful for determining system load trends:</p>
+<ul>
+<li>If the value is higher than the number of CPU cores, the system may be overloaded.</li>
+<li>If it&#39;s lower, the system is handling the load well.</li>
+</ul>
+<p><strong>Note:</strong> On Windows systems, <code>os.loadavg()</code> always returns <code>[0, 0, 0]</code> because
+load average is a Unix-specific concept and is not supported by Windows.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/LoadAverage.html" target="_self" >LoadAverage</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>An object containing the system&#39;s load averages:</p>
+<ul>
+<li><code>load1min</code> (number): System load over the last 1 minute.</li>
+<li><code>load5min</code> (number): System load over the last 5 minutes.</li>
+<li><code>load15min</code> (number): System load over the last 15 minutes.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/logs.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getLogs"></a>
+                    <span class="name">
+                        <span ><b>getLogs</b></span>
+                        <a href="#getLogs"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getLogs(path: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, keyword?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves logs from a specified file and optionally filters them by a keyword.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>path</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The path to the log file.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                                <td>keyword</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    Yes
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>An optional keyword to filter logs.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;string[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>A promise that resolves to an array of log lines,
+either filtered by the keyword or the complete log data if no keyword is provided.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/memoryUsage.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getMemoryUsage"></a>
+                    <span class="name">
+                        <span ><b>getMemoryUsage</b></span>
+                        <a href="#getMemoryUsage"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getMemoryUsage()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Asynchronously retrieves memory usage statistics, including total, free, and used memory.</p>
+<p>The function gathers system memory information and calculates the used memory by subtracting
+the free memory from the total memory available on the system.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>A promise that resolves to an object containing
+memory usage data with properties for total, free, and used memory.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/networkInfo.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getNetworkInfo"></a>
+                    <span class="name">
+                        <span ><b>getNetworkInfo</b></span>
+                        <a href="#getNetworkInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getNetworkInfo()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Asynchronously retrieves network interface information, including details for each network interface
+available on the system.</p>
+<p>The function gathers data such as the IP addresses and netmask for each network interface,
+facilitating network monitoring and diagnostics.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>A promise that resolves to an object containing
+network interface data.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/osInfo.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getOSInfo"></a>
+                    <span class="name">
+                        <span ><b>getOSInfo</b></span>
+                        <a href="#getOSInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getOSInfo()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Asynchronously retrieves detailed information about the operating system.</p>
+<p>The function gathers various information such as the OS platform, release version, architecture,
+kernel version, hostname, home directory, uptime, memory statistics, CPU details, network interfaces,
+and user information.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/OSInfo.html" target="_self" >OSInfo</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>An object containing various OS information.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/processInfo.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getProcessInfo"></a>
+                    <span class="name">
+                        <span ><b>getProcessInfo</b></span>
+                        <a href="#getProcessInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getProcessInfo()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Asynchronously retrieves the CPU and memory usage for the current process.</p>
+<p>The function provides detailed information about the CPU time used by the process and the memory
+footprint, including the Resident Set Size (RSS).</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>A promise that resolves to an object containing
+CPU and memory usage data for the current process.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/scheduledTasks.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getScheduledTasks"></a>
+                    <span class="name">
+                        <span ><b>getScheduledTasks</b></span>
+                        <a href="#getScheduledTasks"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getScheduledTasks()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves a list of scheduled tasks from the system and parses them into an object.</p>
+<ul>
+<li>On Windows, it uses the <code>schtasks</code> command to list scheduled tasks.</li>
+<li>On Unix-based systems, it uses <code>crontab -l</code> to list the current user&#39;s cron jobs.</li>
+</ul>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;ScheduledTasksResponse&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>A promise that resolves to an object containing the list of scheduled tasks.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="parseTasks"></a>
+                    <span class="name">
+                        <span ><b>parseTasks</b></span>
+                        <a href="#parseTasks"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>parseTasks(output: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Parses the command output into a structured format.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>output</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The raw command output as a string.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/ScheduledTask.html" target="_self" >ScheduledTask[]</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>An array of objects representing the scheduled tasks.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/serviceStatus.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getServiceStatus"></a>
+                    <span class="name">
+                        <span ><b>getServiceStatus</b></span>
+                        <a href="#getServiceStatus"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getServiceStatus(serviceName: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves the status of a given service.</p>
+<ul>
+<li>On Windows, it uses the <code>sc query</code> command to check the service status.</li>
+<li>On Unix-based systems, it uses the <code>systemctl is-active</code> command to determine if the service is active.</li>
+</ul>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>serviceName</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>The name of the service whose status is to be checked.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/typealiases.html#ServiceStatus" target="_self" >Promise&lt;ServiceStatus&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>A promise that resolves to the service status:</li>
+<li><code>&#39;running&#39;</code> if the service is running,</li>
+<li><code>&#39;inactive&#39;</code> if the service is not running,</li>
+<li><code>&#39;unknown&#39;</code> if the status could not be determined or an error occurred.</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/uptime.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getSystemUptime"></a>
+                    <span class="name">
+                        <span ><b>getSystemUptime</b></span>
+                        <a href="#getSystemUptime"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getSystemUptime()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Asynchronously retrieves the system uptime in seconds.</p>
+<p>The function returns the total number of seconds the system has been running since the last boot,
+providing valuable information for system monitoring and diagnostics.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>A promise that resolves to the system uptime in seconds.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/temperature.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getTemperature"></a>
+                    <span class="name">
+                        <span ><b>getTemperature</b></span>
+                        <a href="#getTemperature"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getTemperature()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Get system temperature based on the platform.</p>
+<p>This function retrieves the temperature of the CPU or thermal zone, depending on the operating system:</p>
+<ul>
+<li>On Linux, it reads from the thermal zone file.</li>
+<li>On Windows, it uses WMIC to get the temperature.</li>
+<li>On macOS, temperature retrieval is currently not supported.</li>
+</ul>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number | undefined&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                <p>Temperature in Celsius or undefined if not supported or an error occurs.</p>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/userInfo.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserInfo"></a>
+                    <span class="name">
+                        <span ><b>getUserInfo</b></span>
+                        <a href="#getUserInfo"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getUserInfo()</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves extended user information and system details.</p>
+</div>
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/ExtendedUserInfo.html" target="_self" >ExtendedUserInfo</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                <ul>
+<li>Object containing user and system information.</li>
+<li><code>username</code>: The name of the current user.</li>
+<li><code>homedir</code>: The home directory of the user.</li>
+<li><code>shell</code>: The default shell for the user (e.g., <code>/bin/bash</code>, <code>/bin/zsh</code>).</li>
+<li><code>hostname</code>: The hostname of the operating system.</li>
+<li><code>platform</code>: The platform on which the Node.js process is running (e.g., &#39;linux&#39;, &#39;win32&#39;).</li>
+<li><code>architecture</code>: The architecture of the operating system&#39;s processor (e.g., &#39;x64&#39;, &#39;arm&#39;).</li>
+</ul>
+
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/trackTime.ts</h3>
+    <section data-compodoc="block-methods">
+    <h3></h3>    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="logToFile"></a>
+                    <span class="name">
+                        <span ><b>logToFile</b></span>
+                        <a href="#logToFile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>logToFile(logData: <a href="../interfaces/LogData.html" target="_self">LogData</a>, filePath: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Writes log data to a specified file in JSON format.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>logData</td>
+                                            <td>
+                                                            <code><a href="../interfaces/LogData.html" target="_self" >LogData</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>Data to log.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                                <td>filePath</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>Path to the log file.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="trackTime"></a>
+                    <span class="name">
+                        <span ><b>trackTime</b></span>
+                        <a href="#trackTime"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>trackTime(options: <a href="../interfaces/TrackTimeOptions.html" target="_self">TrackTimeOptions</a>)</code>
+                </td>
+            </tr>
+
+
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Middleware to track request/response time.</p>
+<p>This middleware logs the time taken for each request to complete and
+can store logs either in a file or by invoking a provided callback function
+to store the log data in a database.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                                <td>Description</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>options</td>
+                                            <td>
+                                                            <code><a href="../interfaces/TrackTimeOptions.html" target="_self" >TrackTimeOptions</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                            <td>
+                                                    <ul>
+<li>Options to configure logging behavior.</li>
+</ul>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'miscellaneous-functions';
+            var COMPODOC_CURRENT_PAGE_URL = 'functions.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

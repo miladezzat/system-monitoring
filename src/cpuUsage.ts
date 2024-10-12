@@ -1,5 +1,5 @@
 import os from "os";
-import { CpuCoreInfo, CpuInfo } from "./types";
+import { CpuCoreInfo, CpuInfo, SystemMonitorError } from "./types";
 
 /**
  * Asynchronously retrieves detailed CPU information, including total and per-core statistics.
@@ -12,7 +12,7 @@ import { CpuCoreInfo, CpuInfo } from "./types";
  *
  * @returns {Promise<CpuInfo>} A promise that resolves to an object containing detailed CPU statistics.
  *
- * @throws {Error} If the CPU information cannot be retrieved or an error occurs during calculation.
+ * @throws {CustomError} Throws a custom error object containing message, statusCode, and stack trace.
  *
  * @example
  *
@@ -22,18 +22,23 @@ import { CpuCoreInfo, CpuInfo } from "./types";
  *     console.log('Per-Core Details:', cpuInfo.coreDetails);
  *   })
  *   .catch(error => {
- *     console.error('Failed to retrieve CPU info:', error);
+ *     console.error('Error occurred:', error);
  *   });
  */
 export async function getCpuInfo(): Promise<CpuInfo> {
   try {
-    const cpus = os.cpus();
+    const cpus = os.cpus(); // Retrieves an array of CPU core objects.
 
-    // Aggregate total times across all cores
+    // Initialize total time counters for all cores.
     let totalUserTime = 0;
     let totalSystemTime = 0;
     let totalIdleTime = 0;
 
+    /**
+     * Maps each CPU core's time statistics and calculates its usage percentage.
+     *
+     * @type {CpuCoreInfo[]} An array of core-specific CPU information.
+     */
     const coreDetails: CpuCoreInfo[] = cpus.map((cpu, index) => {
       const userTime = cpu.times.user;
       const systemTime = cpu.times.sys;
@@ -43,7 +48,7 @@ export async function getCpuInfo(): Promise<CpuInfo> {
       const usedTime = userTime + systemTime;
       const usagePercentage = (usedTime / totalTime) * 100;
 
-      // Accumulate total times
+      // Accumulate total times for all cores.
       totalUserTime += userTime;
       totalSystemTime += systemTime;
       totalIdleTime += idleTime;
@@ -54,15 +59,20 @@ export async function getCpuInfo(): Promise<CpuInfo> {
         systemTime,
         idleTime,
         totalTime,
-        usagePercentage: parseFloat(usagePercentage.toFixed(2)),
+        usagePercentage: parseFloat(usagePercentage.toFixed(2)), // Round to 2 decimal places.
       };
     });
 
-    // Calculate total CPU times across all cores
+    // Calculate the aggregate total CPU times across all cores.
     const totalTime = totalUserTime + totalSystemTime + totalIdleTime;
     const usedTime = totalUserTime + totalSystemTime;
     const usagePercentage = (usedTime / totalTime) * 100;
 
+    /**
+     * Returns the aggregated CPU statistics and core-specific details.
+     *
+     * @type {CpuInfo}
+     */
     return {
       totalUserTime,
       totalSystemTime,
@@ -73,8 +83,20 @@ export async function getCpuInfo(): Promise<CpuInfo> {
       usagePercentage: parseFloat(usagePercentage.toFixed(2)),
       coreDetails,
     };
-  } catch (error) {
-    console.error("Error retrieving CPU info:", error);
-    throw new Error("Failed to retrieve CPU info");
+  } catch (error: Error | unknown) {
+    if (error instanceof Error) {
+      // Throwing a custom error with message, statusCode, and stack trace
+      throw new SystemMonitorError(
+        `Failed to retrieve CPU info: ${error.message}`,
+        (error as Error)?.name || "",
+        error.stack,
+      );
+    } else {
+      throw new SystemMonitorError(
+        "Unknown error occurred while retrieving CPU info",
+      );
+    }
   }
 }
+
+export default getCpuInfo;
