@@ -1,6 +1,6 @@
 {
     "name": "system-monitoring",
-    "version": "0.0.15",
+    "version": "0.0.16",
     "description": "A zero-dependency server monitor package",
     "main": "dist/index.js",
     "types": "./dist/index.d.ts",
@@ -11,6 +11,7 @@
         "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
         "version": "standard-version",
         "postversion": "git push --follow-tags",
+        "docs": "npx @compodoc/compodoc -p tsconfig.json -d docs",
         "test": "jest --config=jest.config.js"
     },
     "keywords": [
