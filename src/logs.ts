@@ -1,41 +1,58 @@
-import fs from "fs";
-import { SystemMonitorError } from "./types"; // Import the custom error class
+import { open } from "node:fs/promises";
 
-/**
- * Retrieves logs from a specified file and optionally filters them by a keyword.
- *
- * @param {string} path - The path to the log file.
- * @param {string} [keyword] - An optional keyword to filter logs.
- * @returns {Promise<string[]>} - A promise that resolves to an array of log lines,
- *   either filtered by the keyword or the complete log data if no keyword is provided.
- * @throws {SystemMonitorError} - Throws a structured error if file reading fails or an unknown error occurs.
- *
- * @example
- * getLogs('/path/to/logfile.log', 'ERROR')
- *   .then(logs => console.log('Filtered logs:', logs))
- *   .catch(error => console.error('Error retrieving logs:', error));
- */
+export interface LogReadOptions {
+  maxBytes?: number;
+  maxLines?: number;
+  signal?: AbortSignal;
+}
+/** Read a bounded tail of a regular file; never buffer the entire log. */
 export async function getLogs(
   path: string,
   keyword?: string,
+  options: LogReadOptions = {},
 ): Promise<string[]> {
+  const maxBytes = options.maxBytes ?? 1024 * 1024;
+  const maxLines = options.maxLines ?? 1000;
+  if (
+    !Number.isInteger(maxBytes) ||
+    maxBytes < 1 ||
+    maxBytes > 16 * 1024 * 1024 ||
+    !Number.isInteger(maxLines) ||
+    maxLines < 1 ||
+    maxLines > 10000
+  )
+    throw new RangeError("Invalid log read limits");
+  options.signal?.throwIfAborted();
+  const handle = await open(path, "r");
   try {
-    const logs = fs.readFileSync(path, "utf8");
-    const logLines = logs.split("\n");
-
-    // If a keyword is provided, filter the log lines
-    if (keyword) {
-      return logLines.filter((line) => line.includes(keyword));
+    const stat = await handle.stat();
+    if (!stat.isFile()) throw new TypeError("Logs must be a regular file");
+    const offset = Math.max(0, stat.size - maxBytes);
+    const buffer = Buffer.alloc(Math.min(stat.size, maxBytes));
+    let read = 0;
+    while (read < buffer.length) {
+      options.signal?.throwIfAborted();
+      const { bytesRead } = await handle.read(
+        buffer,
+        read,
+        buffer.length - read,
+        offset + read,
+      );
+      if (!bytesRead) break;
+      read += bytesRead;
     }
-
-    return logLines; // Return all log lines if no keyword is provided
-  } catch (error) {
-    throw new SystemMonitorError(
-      `Failed to read logs from file: ${(error as Error)?.message || String(error)}`,
-      "LogFileReadError",
-      (error as Error)?.stack,
-    );
+    options.signal?.throwIfAborted();
+    let text = buffer.subarray(0, read).toString("utf8");
+    if (offset) {
+      const newline = text.indexOf("\n");
+      text = newline < 0 ? "" : text.slice(newline + 1);
+    }
+    const lines = text.split(/\r?\n/);
+    if (lines[lines.length - 1] === "") lines.pop();
+    const tail = lines.slice(-maxLines);
+    return keyword ? tail.filter((line) => line.includes(keyword)) : tail;
+  } finally {
+    await handle.close();
   }
 }
-
 export default getLogs;

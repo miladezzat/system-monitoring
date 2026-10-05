@@ -1,93 +1,55 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import {
-  ScheduledTask,
-  ScheduledTasksResponse,
-  SystemMonitorError,
-} from "./types"; // Import the custom error class
+import type { ScheduledTask, ScheduledTasksResponse } from "./types";
+import { runCommand } from "./platforms/command";
 
-const execPromise = promisify(exec);
-
-/**
- * Parses the command output into a structured format.
- *
- * @param {string} output - The raw command output as a string.
- * @returns {ScheduledTask[]} - An array of objects representing the scheduled tasks.
- */
-function parseTasks(output: string): ScheduledTask[] {
-  const tasks: ScheduledTask[] = [];
-
-  if (process.platform === "win32") {
-    // Example parsing logic for Windows `schtasks` output
-    const lines = output.split("\n");
-    lines.forEach((line) => {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length > 1) {
-        tasks.push({
-          name: parts[0],
-          details: parts.slice(1).join(" "),
-        });
-      }
-    });
-  } else {
-    // Example parsing logic for Unix `crontab -l` output
-    const lines = output.split("\n");
-    lines.forEach((line) => {
-      if (line.trim() !== "") {
-        tasks.push({
-          name: "Cron Job",
-          details: line.trim(),
-        });
-      }
-    });
+function csvRow(line: string): string[] {
+  const cells: string[] = [];
+  let cell = "",
+    quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (quoted && line[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else quoted = !quoted;
+    } else if (c === "," && !quoted) {
+      cells.push(cell);
+      cell = "";
+    } else cell += c;
   }
-
-  return tasks;
+  cells.push(cell);
+  return cells;
 }
-
-/**
- * Retrieves a list of scheduled tasks from the system and parses them into an object.
- *
- * - On Windows, it uses the `schtasks` command to list scheduled tasks.
- * - On Unix-based systems, it uses `crontab -l` to list the current user's cron jobs.
- *
- * @returns {Promise<ScheduledTasksResponse>} - A promise that resolves to an object containing the list of scheduled tasks.
- * @throws {SystemMonitorError} - Throws an error if the command execution fails or an unknown error occurs.
- *
- * @example
- * getScheduledTasks()
- *   .then(response => console.log(response.tasks))
- *   .catch(error => console.error('Error retrieving scheduled tasks:', error));
- */
-export async function getScheduledTasks(): Promise<ScheduledTasksResponse> {
-  // Determine the command to execute based on the operating system
-  const cmd =
-    process.platform === "win32"
-      ? "schtasks" // Windows command to list scheduled tasks
-      : "crontab -l"; // Unix-based command to list cron jobs
-
-  try {
-    const { stdout, stderr } = await execPromise(cmd);
-
-    // If there's any error output (stderr), treat it as an error
-    if (stderr) {
-      return {
-        tasks: [],
-        error: `Error occurred while fetching scheduled tasks: ${stderr}`,
-      };
-    }
-
-    // Parse the command's standard output
-    const tasks = parseTasks(stdout);
-    return { tasks };
-  } catch (error: unknown) {
-    // Handle and throw custom SystemMonitorError
-    throw new SystemMonitorError(
-      `Failed to retrieve scheduled tasks: ${(error as Error)?.message || String(error)}`,
-      "ScheduledTasksRetrievalError",
-      (error as Error)?.stack,
-    );
-  }
+export function parseScheduledTasks(
+  output: string,
+  platform: NodeJS.Platform = process.platform,
+): ScheduledTask[] {
+  return output
+    .split(/\r?\n/)
+    .filter(
+      (line) =>
+        line.trim() &&
+        !/^\s*#/.test(line) &&
+        (platform === "win32" || !/^\s*[A-Za-z_][A-Za-z0-9_]*\s*=/.test(line)),
+    )
+    .map((line) => {
+      if (platform !== "win32")
+        return { name: "Cron Job", details: line.trim() };
+      const [name, ...details] = csvRow(line);
+      return { name, details: details.join(" | ") };
+    });
 }
-
+export async function getScheduledTasks(
+  signal?: AbortSignal,
+): Promise<ScheduledTasksResponse> {
+  const windows = process.platform === "win32";
+  const { stdout, stderr, exitCode } = await runCommand(
+    windows ? "schtasks.exe" : "crontab",
+    windows ? ["/Query", "/FO", "CSV", "/NH"] : ["-l"],
+    { signal, acceptedExitCodes: windows ? [] : [1] },
+  );
+  if (exitCode === 1 && /no crontab/i.test(stderr)) return { tasks: [] };
+  if (exitCode !== 0) throw new Error(stderr || "Scheduled task query failed");
+  return { tasks: parseScheduledTasks(stdout) };
+}
 export default getScheduledTasks;

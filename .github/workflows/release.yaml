@@ -1,0 +1,34 @@
+name: Publish release
+on:
+  push:
+    tags: [v*]
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: npm-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Verify reviewed commit and version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          node -e 'if(process.env.RELEASE_TAG !== "v" + require("./package.json").version) process.exit(1)'
+      - run: npm ci
+      - run: npm run check
+      - run: npm run docs
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

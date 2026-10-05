@@ -59,3 +59,11 @@ export { default as errorTrackingMiddleware } from "./errorTrackingMiddleware";
 
 export * from "./trackRequestResponseTime";
 export { default as trackRequestResponseTime } from "./trackRequestResponseTime";
+
+export { createMonitor } from "./core/monitor";
+export type * from "./core/contracts";
+export type {
+  MonitorRequest,
+  MonitorResponse,
+  NextFunction,
+} from "./httpTypes";

@@ -1,62 +1,30 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import { ServiceStatus, SystemMonitorError } from "./types"; // Import the custom error class
+import { ServiceStatus } from "./types";
+import { runCommand } from "./platforms/command";
 
-const execPromise = promisify(exec);
-
-/**
- * Retrieves the status of a given service.
- *
- * - On Windows, it uses the `sc query` command to check the service status.
- * - On Unix-based systems, it uses the `systemctl is-active` command to determine if the service is active.
- *
- * @param {string} serviceName - The name of the service whose status is to be checked.
- * @returns {Promise<ServiceStatus>} - A promise that resolves to the service status:
- *   - `'running'` if the service is running,
- *   - `'inactive'` if the service is not running,
- *   - `'unknown'` if the status could not be determined or an error occurred.
- * @throws {SystemMonitorError} - Throws a structured error if the command execution fails or an unknown error occurs.
- *
- * @example
- * getServiceStatus('nginx')
- *   .then(status => console.log(`Service status: ${status}`))
- *   .catch(error => console.error('Error checking service status:', error));
- */
+/** Query a service without a shell. Unsupported managers return unknown. */
 export async function getServiceStatus(
   serviceName: string,
 ): Promise<ServiceStatus> {
-  // Determine the command to execute based on the operating system
-  const cmd =
-    process.platform === "win32"
-      ? `sc query ${serviceName}` // Windows command to get service status
-      : `systemctl is-active ${serviceName}`; // Unix-based command to check if the service is active
-
-  try {
-    const { stdout, stderr } = await execPromise(cmd);
-
-    // If there's any error output (stderr), treat it as an error
-    if (stderr) {
-      throw new SystemMonitorError(
-        `Error occurred while checking service status: ${stderr}`,
-        "ServiceStatusCheckError",
-      );
-    }
-
-    if (process.platform === "win32") {
-      // On Windows, check if the service status includes 'RUNNING'
-      return stdout.includes("RUNNING") ? "running" : "inactive";
-    } else {
-      // On Unix-based systems, check if the output is 'active'
-      return stdout.trim() === "active" ? "running" : "inactive";
-    }
-  } catch (error: unknown) {
-    // Handle and throw custom SystemMonitorError
-    throw new SystemMonitorError(
-      `Failed to retrieve service status: ${(error as Error)?.message || String(error)}`,
-      "ServiceStatusRetrievalError",
-      (error as Error)?.stack,
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.@:$ -]{0,255}$/.test(serviceName))
+    throw new TypeError("Invalid service name");
+  if (process.platform === "win32") {
+    const { stdout, exitCode } = await runCommand(
+      "sc.exe",
+      ["query", serviceName],
+      { acceptedExitCodes: [1060] },
     );
+    if (exitCode === 1060) return "unknown";
+    return /\bRUNNING\b/.test(stdout) ? "running" : "inactive";
   }
+  if (process.platform !== "linux") return "unknown";
+  const { stdout } = await runCommand(
+    "systemctl",
+    ["is-active", "--", serviceName],
+    { acceptedExitCodes: [3, 4] },
+  );
+  const state = stdout.trim();
+  if (state === "active") return "running";
+  if (state === "inactive" || state === "failed") return "inactive";
+  return "unknown";
 }
-
 export default getServiceStatus;

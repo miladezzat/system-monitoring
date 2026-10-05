@@ -2,12 +2,11 @@ import os from "os";
 import { CpuCoreInfo, CpuInfo, SystemMonitorError } from "./types";
 
 /**
- * Asynchronously retrieves detailed CPU information, including total and per-core statistics.
+ * Retrieves cumulative CPU counters and lifetime utilization. Use createMonitor for interval utilization.
  * It gathers information like total CPU time, idle time, user/system time, and CPU usage percentages.
  *
  * The function provides an overall summary of the CPU, as well as core-specific data.
  *
- * @async
  * @function getCpuInfo
  *
  * @returns {Promise<CpuInfo>} A promise that resolves to an object containing detailed CPU statistics.
@@ -44,9 +43,10 @@ export async function getCpuInfo(): Promise<CpuInfo> {
       const systemTime = cpu.times.sys;
       const idleTime = cpu.times.idle;
 
-      const totalTime = userTime + systemTime + idleTime;
-      const usedTime = userTime + systemTime;
-      const usagePercentage = (usedTime / totalTime) * 100;
+      const totalTime =
+        userTime + systemTime + idleTime + cpu.times.nice + cpu.times.irq;
+      const usedTime = totalTime - idleTime;
+      const usagePercentage = totalTime ? (usedTime / totalTime) * 100 : 0;
 
       // Accumulate total times for all cores.
       totalUserTime += userTime;
@@ -64,9 +64,12 @@ export async function getCpuInfo(): Promise<CpuInfo> {
     });
 
     // Calculate the aggregate total CPU times across all cores.
-    const totalTime = totalUserTime + totalSystemTime + totalIdleTime;
-    const usedTime = totalUserTime + totalSystemTime;
-    const usagePercentage = (usedTime / totalTime) * 100;
+    const totalTime = coreDetails.reduce(
+      (sum, core) => sum + core.totalTime,
+      0,
+    );
+    const usedTime = totalTime - totalIdleTime;
+    const usagePercentage = totalTime ? (usedTime / totalTime) * 100 : 0;
 
     /**
      * Returns the aggregated CPU statistics and core-specific details.
