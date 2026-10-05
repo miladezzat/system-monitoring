@@ -1,0 +1,31 @@
+{
+  "entryPoints": ["src/index.ts", "src/express/index.ts"],
+  "out": ".docs-output",
+  "name": "system-monitoring",
+  "readme": "README.md",
+  "includeVersion": true,
+  "validation": {
+    "notExported": true,
+    "invalidLink": true
+  },
+  "sourceLinkTemplate": "https://github.com/miladezzat/system-monitoring/blob/{gitRevision}/{path}#L{line}",
+  "highlightLanguages": [
+    "typescript",
+    "javascript",
+    "json",
+    "bash",
+    "http",
+    "shell",
+    "console"
+  ],
+  "externalSymbolLinkMappings": {
+    "@types/node": {
+      "\"http\".request": "https://nodejs.org/api/http.html#httprequestoptions-callback",
+      "\"http\".createServer": "https://nodejs.org/api/http.html#httpcreateserveroptions-requestlistener",
+      "\"http\".Server": "https://nodejs.org/api/http.html#class-httpserver",
+      "\"http\".ClientRequest": "https://nodejs.org/api/http.html#class-httpclientrequest",
+      "EventEmitter.defaultMaxListeners": "https://nodejs.org/api/events.html#eventsdefaultmaxlisteners"
+    }
+  },
+  "treatWarningsAsErrors": true
+}

@@ -7,7 +7,6 @@ import { SystemMonitorError } from "./types"; // Import the custom error
  * The function returns the total number of seconds the system has been running since the last boot,
  * providing valuable information for system monitoring and diagnostics.
  *
- * @async
  * @function getSystemUptime
  * @returns {Promise<number>} A promise that resolves to the system uptime in seconds.
  *

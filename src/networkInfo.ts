@@ -9,7 +9,6 @@ import { SystemMonitorError } from "./types"; // Import the custom error
  * The function gathers data such as the IP addresses and netmask for each network interface,
  * facilitating network monitoring and diagnostics.
  *
- * @async
  * @function getNetworkInfo
  *
  * @returns {Promise<MonitorData['networkInfo']>} A promise that resolves to an object containing

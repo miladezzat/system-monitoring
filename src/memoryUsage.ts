@@ -8,7 +8,6 @@ import { SystemMonitorError } from "./types"; // Import the custom error
  * The function gathers system memory information and calculates the used memory by subtracting
  * the free memory from the total memory available on the system.
  *
- * @async
  * @function getMemoryUsage
  *
  * @returns {Promise<MonitorData['memoryUsage']>} A promise that resolves to an object containing
