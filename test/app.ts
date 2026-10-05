@@ -1,37 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app.ts
 import express from "express";
-import { trackTime, systemMonitor } from "../src";
+import {
+  systemMonitor,
+  createErrorTrackingMiddleware,
+  trackTime,
+} from "../src/express";
 
-const app = express();
-
-// Example database storage function
-function storeOnDb(logData: {
-  method: string;
-  url: string;
-  responseTime: string;
-  timestamp: string;
-}) {
-  // Simulate storing in a database
-  console.log("Storing log in database:", logData);
+async function main() {
+  const app = express();
+  const metrics = systemMonitor();
+  const errors = createErrorTrackingMiddleware();
+  const logger = trackTime({ filePath: "./logs/requests.jsonl" });
+  await metrics.start();
+  app.use(metrics, errors, logger);
+  app.get("/", (_req, res) =>
+    res.json({ snapshot: metrics.getSnapshot(), errors: errors.getStats() }),
+  );
+  const server = app.listen(3000);
+  process.once("SIGTERM", () => {
+    server.close(() => {
+      void Promise.all([metrics.stop(), logger.close()]);
+    });
+  });
 }
-
-// Use the middleware and configure the options
-app.use(
-  trackTime({
-    filePath: "./logs/request_logs", // Option to log to a file
-    storeOnDb: storeOnDb, // Option to store in database
-  }),
-);
-
-app.use(systemMonitor({ fileSystemInfo: true }));
-
-// Sample route
-app.get("/", (req: any, res) => {
-  res.json({ message: "Hello, world!", systemMetrics: req.systemMetrics });
-});
-
-// Start the server
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
+void main();

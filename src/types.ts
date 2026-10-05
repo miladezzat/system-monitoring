@@ -1,4 +1,4 @@
-import { Request } from "express";
+import type { MonitorRequest } from "./httpTypes";
 import os from "os";
 
 export type ServiceStatus = "running" | "inactive" | "unknown";
@@ -43,7 +43,12 @@ export interface MonitorOptions {
   uptime?: boolean; // Enable monitoring of system uptime
   processInfo?: boolean; // Enable monitoring of process information
   temperature?: boolean; // Enable monitoring of system temperature
-  logs?: { path: string; keyword?: string }; // Options for log monitoring
+  logs?: {
+    path: string;
+    keyword?: string;
+    maxBytes?: number;
+    maxLines?: number;
+  }; // Options for log monitoring
   responseTime?: boolean; // Enable monitoring of response time
   osInfo?: boolean; // Enable monitoring of operating system information
   loadAverage?: boolean; // Enable monitoring of load average
@@ -67,7 +72,9 @@ export interface MonitorData {
   networkInfo?: NodeJS.Dict<os.NetworkInterfaceInfo[]>; // Information about network interfaces
   uptime?: number; // System uptime in seconds
   processInfo?: {
-    cpu: number; // CPU usage percentage
+    cpu: number; // Deprecated: cumulative CPU time in milliseconds
+    cpuTimeMs?: number;
+    cpuPercent?: number;
     memory: number; // Memory usage in bytes
   };
   temperature?: number; // System temperature in Celsius
@@ -112,7 +119,7 @@ export interface CpuInfo {
   totalSystemTime: number; // Total time spent by all cores executing system-level (kernel) code in milliseconds
   totalIdleTime: number; // Total time spent by all cores in an idle state in milliseconds
   totalTime: number; // Total time that the CPU has been operational in milliseconds
-  usedTime: number; // Total active time (userTime + systemTime) in milliseconds
+  usedTime: number; // Total non-idle time, including nice and IRQ time in milliseconds
   idleTime: number; // Total idle time across all CPU cores in milliseconds
   usagePercentage: number; // Overall CPU usage as a percentage
   coreDetails: CpuCoreInfo[]; // Array of per-core usage statistics
@@ -204,7 +211,7 @@ export interface ExtendedUserInfo {
 }
 
 // Default monitor options
-export const defaultOptions: MonitorOptions = {
+export const defaultOptions: Readonly<MonitorOptions> = Object.freeze({
   cpu: true,
   memory: true,
   disk: true,
@@ -218,7 +225,7 @@ export const defaultOptions: MonitorOptions = {
   activeConnections: false,
   scheduledTasks: false,
   temperature: false,
-};
+});
 
 /**
  * Options for tracking request/response time.
@@ -229,7 +236,10 @@ export const defaultOptions: MonitorOptions = {
  */
 export interface TrackTimeOptions {
   filePath?: string;
-  storeOnDb?: (logData: LogData) => void;
+  storeOnDb?: (logData: LogData) => void | Promise<void>;
+  maxQueueSize?: number;
+  maxQueueBytes?: number;
+  onError?: (error: Error) => void | Promise<void>;
 }
 
 /**
@@ -249,9 +259,12 @@ export interface LogData {
 }
 
 // Interface to extend the Express Request object
-export interface TrackingCustomErrorRequest extends Request {
+export interface TrackingCustomErrorRequest extends MonitorRequest {
   errorResponse?: {
     totalRequests: number;
+    completedRequests: number;
+    activeRequests: number;
+    abortedRequests: number;
     errorCount: number;
     errorRate: string;
     errorRoutes: { [key: string]: number };

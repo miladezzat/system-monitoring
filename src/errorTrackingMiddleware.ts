@@ -1,66 +1,70 @@
-import { Response, NextFunction } from "express";
-import { TrackingCustomErrorRequest } from "./types";
+import type { MonitorResponse, NextFunction } from "./httpTypes";
+import type { TrackingCustomErrorRequest } from "./types";
 
-/**
- * Factory function to create error tracking middleware with isolated state.
- *
- * This middleware tracks the total number of requests and counts the number of errors
- * that occur during those requests. It also keeps track of the routes that caused errors.
- *
- * @returns {(req: TrackingCustomErrorRequest, res: Response, next: NextFunction) => void} - An Express middleware function.
- */
-export const createErrorTrackingMiddleware = () => {
-  // In-memory storage for error tracking
-  let totalRequests: number = 0; // Total number of requests received
-  let errorCount: number = 0; // Total number of errors encountered
-  const errorRoutes: { [key: string]: number } = {}; // Tracks error counts per route
-
-  return (
+export interface ErrorTrackingOptions {
+  maxRoutes?: number;
+}
+export function createErrorTrackingMiddleware(
+  options: ErrorTrackingOptions = {},
+) {
+  const maxRoutes = options.maxRoutes ?? 1000;
+  if (!Number.isInteger(maxRoutes) || maxRoutes < 1 || maxRoutes > 10000)
+    throw new RangeError("maxRoutes must be an integer between 1 and 10000");
+  let totalRequests = 0,
+    completedRequests = 0,
+    abortedRequests = 0,
+    activeRequests = 0,
+    errorCount = 0;
+  const routes = new Map<string, number>();
+  const getStats = () => ({
+    totalRequests,
+    completedRequests,
+    activeRequests,
+    abortedRequests,
+    errorCount,
+    errorRate: `${(completedRequests ? (errorCount / completedRequests) * 100 : 0).toFixed(2)}%`,
+    errorRoutes: Object.fromEntries(routes),
+  });
+  const middleware = (
     req: TrackingCustomErrorRequest,
-    res: Response,
+    res: MonitorResponse,
     next: NextFunction,
   ): void => {
-    totalRequests++; // Increment total request count
-
-    // Save the original res.send method
-    const originalSend = res.send;
-
-    /**
-     * Overrides the res.send method to intercept the response.
-     * If the status code indicates an error (4xx or 5xx), it increments the error count
-     * and tracks the route that caused the error. Appends error stats to the req object.
-     *
-     * @param {unknown} body - The response body, which can be of any type.
-     * @returns {Response} - The response object.
-     */
-    res.send = function (body: unknown): Response {
-      if (res.statusCode >= 400) {
-        // Increment error count if status code indicates an error
-        errorCount++;
-
-        // Capture the route and increment its error count
-        const route = req.originalUrl;
-        if (errorRoutes[route]) {
-          errorRoutes[route]++;
-        } else {
-          errorRoutes[route] = 1; // Initialize count for the route
-        }
+    totalRequests++;
+    activeRequests++;
+    Object.defineProperty(req, "errorResponse", {
+      configurable: true,
+      get: getStats,
+    });
+    let settled = false;
+    const settle = (completed: boolean) => {
+      if (settled) return;
+      settled = true;
+      res.off("finish", finish);
+      res.off("close", close);
+      activeRequests--;
+      if (!completed) {
+        abortedRequests++;
+        return;
       }
-
-      // Attach error stats to the request object
-      req.errorResponse = {
-        totalRequests,
-        errorCount,
-        errorRate: `${((errorCount / totalRequests) * 100).toFixed(2)}%`, // Calculate error rate as a percentage
-        errorRoutes: { ...errorRoutes }, // Clone the errorRoutes object
-      };
-
-      // Call the original res.send with the body
-      return originalSend.apply(this, [body]) as Response;
+      completedRequests++;
+      if (res.statusCode < 400) return;
+      errorCount++;
+      const template = req.route?.path;
+      let key =
+        typeof template === "string"
+          ? `${req.method ?? "UNKNOWN"} ${req.baseUrl ?? ""}${template}`
+          : "__unmatched__";
+      if (key.length > 512 || (!routes.has(key) && routes.size >= maxRoutes))
+        key = "__other__";
+      routes.set(key, (routes.get(key) ?? 0) + 1);
     };
-
-    next(); // Pass control to the next middleware
+    const finish = () => settle(true);
+    const close = () => settle(res.writableFinished);
+    res.once("finish", finish);
+    res.once("close", close);
+    next();
   };
-};
-
+  return Object.assign(middleware, { getStats });
+}
 export default createErrorTrackingMiddleware;

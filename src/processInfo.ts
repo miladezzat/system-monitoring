@@ -7,7 +7,6 @@ import { SystemMonitorError } from "./types"; // Import the custom error
  * The function provides detailed information about the CPU time used by the process and the memory
  * footprint, including the Resident Set Size (RSS).
  *
- * @async
  * @function getProcessInfo
  * @returns {Promise<MonitorData['processInfo']>} A promise that resolves to an object containing
  * CPU and memory usage data for the current process.
@@ -32,7 +31,8 @@ export async function getProcessInfo(): Promise<MonitorData["processInfo"]> {
     const cpuPercent = (cpuUsage.user + cpuUsage.system) / 1000;
 
     return {
-      cpu: cpuPercent,
+      cpu: cpuPercent, // Legacy cumulative milliseconds, not a percentage.
+      cpuTimeMs: cpuPercent,
       memory: memoryUsage.rss, // Resident Set Size
     };
   } catch (error: unknown) {

@@ -1,351 +1,134 @@
-# System Monitor Package
-![npm](https://img.shields.io/npm/v/system-monitoring) ![npm](https://img.shields.io/npm/l/system-monitoring)
-![npm](https://img.shields.io/npm/dw/system-monitoring)![GitHub stars](https://img.shields.io/github/stars/miladezzat/system-monitoring)
+# system-monitoring
 
+A Node.js library for system and process metrics, with zero runtime dependencies and optional Express middleware. Node.js 22 or newer is required. CommonJS, native ESM imports, and TypeScript declarations are supported.
 
-A lightweight and efficient Node.js library for real-time system monitoring. Track CPU, memory, disk usage, network I/O, and more with ease.
-
-A Node.js package for monitoring system metrics like CPU usage, memory usage, disk usage, network interfaces, uptime, process information, and temperature. This package provides middleware for Express to gather and expose these system metrics in your web applications.
-
-## Table of Contents
-
-- [System Monitor Package](#system-monitor-package)
-  - [Table of Contents](#table-of-contents)
-  - [Installation](#installation)
-  - [Usage](#usage)
-    - [Basic Usage](#basic-usage)
-  - [Available Metrics](#available-metrics)
-  - [Express Middlewares](#express-middlewares)
-  - [Middlewares](#middlewares)
-    - [Error Tracking Middleware](#error-tracking-middleware)
-      - [Overview](#overview)
-      - [`CustomRequest` Interface](#customrequest-interface)
-      - [`createErrorTrackingMiddleware` Function](#createerrortrackingmiddleware-function)
-    - [trackTime](#tracktime)
-      - [Notes](#notes)
-    - [trackRequestResponseTime](#trackrequestresponsetime)
-  - [APIs](#apis)
-  - [Middlewares](#middlewares-1)
-    - [Some Response Examples](#some-response-examples)
-  - [Options](#options)
-  - [Contributing](#contributing)
-
-## Installation
-You can install this package using npm:
-
-```bash
+```sh
 npm install system-monitoring
-## Or yarn add system-monitoring
 ```
 
-## Usage
-
-### Basic Usage
-To use the system-monitoring functions in your project:
+## Collect metrics
 
 ```ts
-import { getCpuInfo, getMemoryUsage, getDiskUsage } from 'system-monitoring';
+import { createMonitor } from "system-monitoring";
 
-// Get CPU information
-getCpuInfo().then(cpuInfo => {
-  console.log('CPU Information:', cpuInfo);
+const monitor = createMonitor({
+  intervalMs: 1000,
+  collectorTimeoutMs: 2000,
+  diskPaths: [process.cwd()],
+  metrics: { cpu: true, memory: true, disk: true },
 });
 
-// Get memory usage
-getMemoryUsage().then(memoryUsage => {
-  console.log('Memory Usage:', memoryUsage);
-});
+await monitor.start();
+// CPU and process utilization need two valid samples. The first is warming_up.
+const snapshot = monitor.getSnapshot();
+console.log(snapshot?.metrics.memory);
 
-// Get disk usage
-const diskUsage = getDiskUsage();
-console.log('Disk Usage:', diskUsage);
+// At application shutdown:
+await monitor.stop();
 ```
 
-## Available Metrics
+`collect()` performs one collection cycle without starting a timer. Concurrent calls share that cycle. A timed-out collector still finishing native I/O is reported as `COLLECTOR_BUSY` until it settles, so another cycle cannot launch more work for that collector. `start()` collects once and starts an unref'ed periodic timer; `stop()` clears it and cancels the current collection. Constructing a monitor and importing the package perform no collection.
 
-You can retrieve the following system metrics using the provided functions:
+Partial `metrics` options merge with the defaults: CPU, memory, disk, interface metadata, uptime, and process metrics are enabled. Temperature, OS/user details, load averages, mounted-volume information, active connections, scheduled tasks, and log reading are opt-in. To disable a default metric, set it to `false`.
 
-1. **CPU Information**: Get detailed CPU usage information for each core, including user/system/idle times and percentages.
-2. **Memory Usage**: Get total, free, and used memory statistics.
-3. **Disk Usage**: Get total, used, and available disk space.
-4. **Network Interfaces**: Get details about the system’s network interfaces.
-5. **Uptime**: Get the system’s uptime in seconds.
-6. **Process Info**: Get the CPU and memory usage of the current Node.js process.
-7. **System Temperature**: Get the current temperature of the system (if supported).
-8. **Logs**: Fetch system logs from a specific file with optional keyword filtering.
+Each metric has a sample timestamp, collection duration, scope, and one of four statuses:
 
-## Express Middlewares
-This package provides an Express middleware to gather and expose system metrics.
+| Status        | Meaning                                                                          |
+| ------------- | -------------------------------------------------------------------------------- |
+| `ok`          | `value` contains a successful measurement.                                       |
+| `warming_up`  | CPU/process utilization requires another valid counter sample.                   |
+| `unavailable` | The platform, hardware, or required executable does not provide this capability. |
+| `error`       | Collection failed; a serializable error contains a code and message.             |
+
+A failed collector does not remove successful metrics. Snapshots and their values are immutable. `getSnapshot(maxAgeMs)` returns `null` before the first completed cycle; afterward it returns the cached snapshot with `ageMs` and `stale`. Reading a snapshot never refreshes it. The default freshness limit is twice the sampling interval.
+
+## Metric semantics
+
+- `cpu`: utilization from counter differences between two samples, including nice/IRQ time. `usagePercentage` is 0–100% across the measured cores. Counter resets, no elapsed time, unchanged counters, and core topology changes return `warming_up`. Counter fields are milliseconds during the interval.
+- `processInfo`: `cpuTimeMs` is cumulative process CPU time; `cpuPercent` is interval utilization relative to one logical core and may exceed 100% for multithreaded work. `memoryBytes` is RSS and `intervalMs` is elapsed sampling time.
+- `memory`: `totalMemory`, `freeMemory`, and `usedMemory` are bytes reported by the OS.
+- `disk`: asynchronous `statfs` data for each requested path: total, used, free, and available bytes and utilization. A requested path is not a claim to enumerate every mounted volume.
+- `network`: interface metadata, not network throughput. `uptime` is seconds; temperature is Celsius; load averages cover 1/5/15 minutes.
+
+Host metrics are labeled `host`, process metrics `process`, disk metrics `filesystem`, and user diagnostics `user`. Container limits are not automatically interpreted as cgroup-aware CPU or memory capacity.
+
+## Express
+
+Install Express separately. The adapter uses structural Node.js HTTP types; importing core metrics does not require Express or its type package.
 
 ```ts
-import express from 'express';
-import { systemMonitor, trackRequestResponseTime, createErrorTrackingMiddleware } from 'system-monitoring';
-
-const errorTrackingMiddleware: ReturnType<typeof createErrorTrackingMiddleware> = createErrorTrackingMiddleware();
+import express from "express";
+import { createMonitor } from "system-monitoring";
+import {
+  createMonitorMiddleware,
+  createErrorTrackingMiddleware,
+  trackRequestResponseTime,
+  trackTime,
+} from "system-monitoring/express";
 
 const app = express();
-
-// Middleware to track response time
-app.use(trackRequestResponseTime()); // the time will append on the response header X-Response-Time
-
-// track error rate
-app.use(errorTrackingMiddleware) // access information by  req.errorResponse
-
-// System monitor middleware
-app.use(systemMonitor({ cpu: true, memory: true, disk: true })); // access information by req.systemMetrics
-
-app.get('/', (req, res) => {
-  res.send('System monitoring active.');
+const monitor = createMonitor();
+await monitor.start();
+const errors = createErrorTrackingMiddleware({ maxRoutes: 1000 });
+const logging = trackTime({
+  filePath: "./logs/requests.jsonl",
+  maxQueueSize: 1024,
+  maxQueueBytes: 1024 * 1024,
+  onError: (error) => console.error(error),
 });
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
-```
-
-
-
-
-## Middlewares
-
-### Error Tracking Middleware
-This middleware tracks error statistics for your Express application by intercepting responses and recording error occurrences. It provides detailed insights into the total number of requests, error count, error rate, and the specific routes that are causing errors.
-#### Overview
-- `CustomRequest` Interface: Extends the default Express `Request` object to include an optional errorResponse property for error statistics.
-- `createErrorTrackingMiddleware` Function: Creates an error tracking middleware with isolated state for tracking errors in your Express application.
-
-
-| Option            | Type                                  | Default | Description                                                |
-|-------------------|---------------------------------------|---------|------------------------------------------------------------|
-| `totalRequests`   | `number`                              | `0`     | The total number of requests processed.                   |
-| `errorCount`      | `number`                              | `0`     | The total number of error responses (status code 400 and above). |
-| `errorRate`       | `string`                              | `0.00%` | The percentage of error responses relative to total requests. |
-| `errorRoutes`     | `{ [key: string]: number }`           | `{}`    | An object mapping routes to the number of errors encountered at each route. |
-
-
-#### `CustomRequest` Interface
-The CustomRequest interface extends the standard Express Request object to include an errorResponse property. This property is used to store error tracking information:
-```ts
-export interface CustomRequest extends Request {
-  errorResponse?: {
-    totalRequests: number;
-    errorCount: number;
-    errorRate: string;
-    errorRoutes: { [key: string]: number };
-  };
-}
-```
-
-#### `createErrorTrackingMiddleware` Function
-This factory function creates an Express middleware function that tracks error statistics. It maintains an in-memory state to count total requests, errors, and error rates. The middleware also tracks errors by route.
-- **Usage**
-1. Import the Middleware: Import the `createErrorTrackingMiddleware` function into your Express application.
-```ts
-import { createErrorTrackingMiddleware } from 'system-monitoring';
-```
-2. Add Middleware to Your Application: Use the middleware in your Express application.
-```ts
-const app = express();
-app.use(createErrorTrackingMiddleware());
-```
-3. Access Error Statistics: You can access error statistics via the `errorResponse` property on the `req` object within your route handlers or other middleware.
-```ts
-app.get('/some-route', (req: CustomRequest, res: Response) => {
-  // Access error statistics
-  const errorStats = req.errorResponse;
-  console.log('Error Statistics:', errorStats);
-  
-  res.send('Response body');
-});
-```
-- Note: Future adding, will add appility to adding on file or db like trackTime 
-
-### trackTime
-`trackTime` is a middleware function for Express.js that tracks the response time for each request and provides the ability to log the data either to a file or to a database via a callback function.
-1. Import the middleware into your Express app.
-2. You can configure trackTime to log the response times to a file, send them to a database, or both.
-
-**Example Code**
-```ts
-import express from 'express';
-import { trackTime } from './middlewares/trackTime';
-
-const app = express();
-
-// Example database storage function (optional)
-function storeOnDb(logData: { method: string; url: string; responseTime: string; timestamp: string }) {
-  // Simulate storing in a database (replace this with your actual DB logic)
-  console.log('Storing log in the database:', logData);
-}
-
-// Use the middleware to track request/response time
-app.use(trackTime({
-  filePath: './logs/request_logs.txt', // Optional: Logs to a file
-  storeOnDb: storeOnDb                 // Optional: Callback to store logs in a database
-}));
-
-// Example route
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+app.use(createMonitorMiddleware(monitor));
+app.use(errors);
+app.use(trackRequestResponseTime());
+app.use(logging);
+app.get("/health", (req, res) => {
+  // Express handlers can use the exported MonitorRequest type when reading
+  // systemSnapshot/systemMetrics, or read the monitor directly.
+  res.json({ metrics: monitor.getSnapshot(), errors: errors.getStats() });
 });
 
-// Start the server
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
+// Invoke these during your application's shutdown sequence:
+// await monitor.stop();
+// await logging.close();
 ```
 
-**Track Time Middleware Options**
-You can configure the behavior of the `trackTime` middleware by passing an options object with the following properties:
+Express 4 and 5 are tested. Middleware reads cached system metrics without running collectors, commands, or filesystem reads on the request path. `req.systemSnapshot` contains typed results; `req.systemMetrics` contains compatible successful values.
 
-| Option        | Type                                   | Description                                                                                                                 |
-|---------------|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `filePath`    | `string` (optional)                    | The path where logs will be written. If provided, the middleware will log each request to this file in JSON format.          |
-| `storeOnDb`   | `(logData: LogData) => void` (optional) | A callback function that receives the log data for storing in a database. This function will be called every time a request finishes. |
+`systemMonitor(options, config)` remains available as a convenience factory. Call `await middleware.start()` before mounting it and `await middleware.stop()` during shutdown. Its `responseTime` option installs HTTP timing. Requests before startup get a `null` snapshot and empty legacy metrics.
 
-**Log Data Structure**
-The log data passed to the file or the storeOnDb function will have the following structure:
-```ts
-interface LogData {
-  method: string;       // HTTP method (e.g., GET, POST)
-  url: string;          // The URL requested
-  responseTime: string; // Time taken to process the request in milliseconds
-  timestamp: string;    // ISO timestamp when the request was made
-}
-```
-**Logging Options**
-1. **Logging to a File:** If you provide the filePath option, the logs will be written to the specified file in JSON format. Each log entry will be appended to the file on a new line.
-Example log entry:
-```json
-{"method":"GET","url":"/","responseTime":"12.345","timestamp":"2024-09-15T10:30:00.123Z"}
-```
-2. **Storing in a Database:** If you pass a storeOnDb callback function, it will be called with the log data. You can implement your own logic to store this data in a database (e.g., MongoDB, MySQL).
+Error tracking uses response completion, so JSON, object, end, streaming, HEAD, redirects, and 204 responses count once. `totalRequests` counts received requests; `completedRequests` supplies the error-rate denominator. Active and aborted requests are separate. Route buckets use matched templates with method/base URL; unmatched requests share a bucket. There are at most `maxRoutes + 1` buckets; keys over 512 characters use the overflow bucket. `getStats()` and the lazy `req.errorResponse` getter return copies of bounded state.
 
-Example of Custom Database Storage Function
-```ts
-// Example function to store log data in a MongoDB database
-import { MongoClient } from 'mongodb';
+`X-Response-Time` measures time until headers are committed. `req.responseTime` measures elapsed time until response completion or close. These are different measurements.
 
-async function storeLogInDb(logData: LogData) {
-  const client = await MongoClient.connect('mongodb://localhost:27017');
-  const db = client.db('logsDatabase');
-  await db.collection('requestLogs').insertOne(logData);
-  await client.close();
-}
+## Logging and diagnostics
 
-// Pass this function to the `trackTime` middleware
-app.use(trackTime({ storeOnDb: storeLogInDb }));
-```
-#### Notes
-- **File Path:** Ensure that the file path exists or is writable by your application. If the path does not exist, the middleware will automatically create the directory.
-- **Performance Considerations:** If you log data to a file or database on every request, ensure your storage mechanism can handle the load without affecting performance.
+`trackTime` removes query strings by default. File and database callbacks execute serially on a bounded queue. `storeOnDb` may return a promise; callback/file failures are handled through `onError` and counted in `getStats()`. On overflow, new records are dropped and counted. A slow callback cannot create unlimited pending work. `flush(timeoutMs = 5000)` waits for queued work; `close(timeoutMs)` stops accepting records and flushes. A hung user callback cannot be forcibly cancelled; flush rejects at its deadline, and queued memory remains bounded.
 
-### trackRequestResponseTime
-// will write docs here
+`getLogs(path, keyword?, { maxBytes, maxLines, signal })` reads the bounded tail of a regular file. Defaults are 1 MiB and 1000 lines; maxima are 16 MiB and 10000 lines. Filtering applies to that tail, not the entire file. A partial first line at the byte boundary is omitted. Monitor options accept these limits through `metrics.logs`.
 
+Service queries execute fixed programs with separate arguments, validated names, a timeout, and an output limit. Linux uses systemd when available; Windows uses the Service Control Manager; macOS returns `unknown`. Mounted-volume collection, connections, temperature, and scheduled tasks depend on platform facilities. Missing executables are explicitly unavailable. macOS temperature and Windows load averages are unavailable through the monitor. Log paths and diagnostics are application-controlled; expose sensitive host/user data only through routes your application chooses to authorize.
 
-## APIs
+## Existing function exports
 
-**System Monitoring Functions**
-- **getCpuInfo()**: Returns CPU usage details for all cores and the system as a whole.
-- **getMemoryUsage()**: Retrieves total, free, and used memory information.
-- **getDiskUsage()**: Fetches disk usage statistics including total, used, and available space.
-- **getNetworkInfo()**: Returns details about all network interfaces.
-- **getSystemUptime()**: Returns the system uptime in seconds.
-- **getProcessInfo()**: Provides the CPU and memory usage of the current process.
-- **getOSInfo**: Retrieves detailed information about the operating system.
-- **getLoadAverage**: Retrieves the system load averages over 1, 5, and 15 minutes.
-- **getUserInfo**: Retrieves extended user information and system details.
-- **getTemperature()**: Returns the system temperature (if supported).
-- **getFileSystemInfo**: Retrieves information about the file system, including disk space usage.
-- **getActiveConnections**: Retrieves the active network connections on the system.
-- **getScheduledTasks**: Retrieves a list of scheduled tasks from the system and parses them into an object.
-- **getServiceStatus**: Retrieves the status of a given service.
-- **getLogs(path, keyword)**: Fetches logs from the specified file, optionally filtering by a keyword.
+The existing named exports and aliases remain available. `getCpuInfo()` returns cumulative counters and a lifetime utilization ratio; use `createMonitor()` for interval CPU utilization. `getProcessInfo().cpu` retains cumulative milliseconds and has an explicit `cpuTimeMs` alias. `getDiskUsage()` / `getDiskInfo()` are now asynchronous; always await them. Raw diagnostic functions remain usable separately from a monitor.
 
+See [MIGRATION.md](MIGRATION.md) for the 0.1.0 changes and [architecture](docs/architecture.md) for the internal design.
 
-## Middlewares
-- **systemMonitor**: System monitor middleware for gathering system metrics.
-- **trackTime**: Middleware to track request/response time. Logs can either be stored in a file or sent to a database via a callback.
-- **createErrorTrackingMiddleware**: Factory function to create error tracking middleware with isolated state
-- **trackRequestResponseTime**: Middleware to track request and response time. and adding the response time to response header in ms
+## Development and release
 
-### Some Response Examples
-
-1. CPU Information
-```json
-{
-  "totalUserTime": 123456,
-  "totalSystemTime": 654321,
-  "totalIdleTime": 789012,
-  "totalTime": 1567890,
-  "usedTime": 777777,
-  "idleTime": 789012,
-  "usagePercentage": 49.5,
-  "coreDetails": [
-    {
-      "coreId": 0,
-      "userTime": 12345,
-      "systemTime": 6543,
-      "idleTime": 7890,
-      "totalTime": 15678,
-      "usagePercentage": 51.4
-    }
-    // more cores...
-  ]
-}
+```sh
+npm ci
+npm run check
+npm run docs
+npm run benchmark
 ```
 
-2. Memory Usage
+CI checks Node.js 22/24 on Linux, macOS, and Windows. Tests exercise real Express 4/5 responses, CPU sampling, bounded state, async failures, cancellation, and platform parser fixtures. Native disk collection is smoke-tested on the runner OS. Optional OS diagnostics require the appropriate executable/hardware; parser fixtures are not proof of every provider or OS configuration.
 
-```json
-{
-    "totalMemory": 16777216,
-    "freeMemory": 8388608,
-    "usedMemory": 8388608
-}
-```
-3. Disk Usage
-```json
-{
-  "total": 104857600,
-  "used": 52428800,
-  "available": 52428800
-}
-```
+Package checks install the built tarball into a clean consumer and verify CommonJS, native ESM, and strict TypeScript without Express types. API documentation builds into `.docs-output`; CI uploads it for review. The committed legacy website is not refreshed or deployed by this change.
 
-## Options
-The `systemMonitor` middleware accepts an object with the following options:
+Publication is tag-based: merge the reviewed version change to `main`, then push its matching `vX.Y.Z` tag. The release workflow verifies the tag/version and main ancestry, runs the checks, and publishes with the configured `NPM_TOKEN` and provenance. It does not increment versions or push commits. Configure that secret before the first release. The PR alone does not publish to npm.
 
-| Option           | Type                                  | Default | Description                                                |
-|------------------|---------------------------------------|---------|------------------------------------------------------------|
-| `cpu`            | `boolean`                             | `true`  | Enable CPU usage monitoring.                              |
-| `memory`         | `boolean`                             | `true`  | Enable memory usage monitoring.                           |
-| `disk`           | `boolean`                             | `true`  | Enable disk usage monitoring.                             |
-| `network`        | `boolean`                             | `true`  | Enable network interface information monitoring.          |
-| `uptime`         | `boolean`                             | `true`  | Enable system uptime monitoring.                          |
-| `processInfo`    | `boolean`                             | `true`  | Enable process CPU and memory usage monitoring.            |
-| `temperature`    | `boolean`                             | `false` | Enable system temperature monitoring (only on Linux/Windows).|
-| `osInfo`         | `boolean`                             | `false` | Enable operating system information monitoring.            |
-| `loadAverage`    | `boolean`                             | `false` | Enable load average monitoring.                           |
-| `userInfo`       | `boolean`                             | `false` | Enable user information monitoring.                       |
-| `fileSystemInfo` | `boolean`                             | `false` | Enable file system information monitoring.                |
-| `activeConnections` | `boolean`                          | `false` | Enable active network connections monitoring.             |
-| `scheduledTasks` | `boolean`                             | `false` | Enable scheduled tasks monitoring.                        |
-| `logs`           | `{ path: string, keyword?: string }`  | `null`  | Fetch logs from a specified file, optionally filtered by keyword. |
-| `responseTime`   | `boolean`                             | `false` | Track response time for each request.                      |
+The benchmark compares an Express baseline with cached system-metrics middleware using repeated, alternating runs. It reports throughput, p50/p95/p99 latency, and event-loop delay. Results depend on hardware, load, and enabled middleware; use the same setup for comparisons. The benchmark does not represent production traffic or the cost of all logging/diagnostic configurations.
 
-
-## Contributing
-Contributions are welcome! If you have any bug reports, suggestions, or feature requests, please open an issue on GitHub.
-
-**To contribute:**
-1. Fork the repository
-2. Create a new feature branch (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -m 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Create a new Pull Request
-
-
-Make sure to follow the [Contributor Covenant Code of Conduct](./CONTRIBUTER.md) when participating in the project.
-
+MIT licensed.
